@@ -3,13 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
   Heart,
-  Activity,
   Flame,
   Download,
   Upload,
   Check,
-  Sparkles,
-  Info,
   ShieldCheck,
   Smartphone,
 } from 'lucide-react';
@@ -45,7 +42,7 @@ export const HealthSyncModal: React.FC<HealthSyncModalProps> = ({ isOpen, onClos
         type: 'HKQuantityTypeIdentifierDietaryWater',
         startDate: new Date(l.timestamp).toISOString(),
         endDate: new Date(l.timestamp).toISOString(),
-        value: l.amount / 1000, // Litres for HealthKit
+        value: l.amount / 1000,
         unit: 'L',
         metadata: {
           HKWasUserEntered: true,
@@ -75,64 +72,64 @@ export const HealthSyncModal: React.FC<HealthSyncModalProps> = ({ isOpen, onClos
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-slate-950/85 backdrop-blur-md"
+          className="absolute inset-0 bg-black/80 backdrop-blur-md"
         />
 
         {/* Modal Window */}
         <motion.div
-          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          initial={{ scale: 0.96, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="relative w-full max-w-lg rounded-3xl glass-surface-glow p-6 z-10 overflow-hidden border border-rose-500/40 max-h-[92vh] flex flex-col"
+          exit={{ scale: 0.96, opacity: 0, y: 15 }}
+          className="relative w-full max-w-lg rounded-3xl apple-glass-modal p-5 sm:p-6 z-10 overflow-hidden max-h-[90vh] flex flex-col space-y-4"
         >
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2.5 rounded-2xl bg-rose-500/20 text-rose-400">
-                <Heart className="w-5 h-5 fill-rose-500/40" />
+          <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08] shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#1c1c1e] border border-white/[0.08] flex items-center justify-center text-lg">
+                <Heart className="w-5 h-5 text-[#ff453a]" />
               </div>
               <div>
-                <h3 className="text-lg font-black text-white font-heading">
-                  Apple Health & Health Connect
+                <h3 className="text-base sm:text-lg font-bold text-white">
+                  Apple Health & Biometrics
                 </h3>
-                <p className="text-xs text-slate-400">
-                  Bi-directional biometric metabolic calorie & fluid sync
+                <p className="text-xs text-neutral-400">
+                  Metabolic calories and dietary fluid sync
                 </p>
               </div>
             </div>
 
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              className="p-1.5 rounded-full text-neutral-400 hover:text-white bg-white/[0.08] transition cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-1">
+          <div className="flex-1 overflow-y-auto space-y-3.5 pr-1">
             {/* Status message */}
             {importedStatus && (
-              <div className="p-3.5 rounded-2xl bg-emerald-950/80 border border-emerald-500/40 text-xs text-emerald-200 flex items-center gap-2">
+              <div className="p-3.5 rounded-2xl bg-[#30d158]/15 border border-[#30d158]/30 text-xs text-[#30d158] flex items-center gap-2">
                 <Check className="w-4 h-4" />
                 <span>{importedStatus}</span>
               </div>
             )}
 
             {/* 1. Import Workout Energy Burned */}
-            <div className="p-4 rounded-3xl bg-slate-900/90 border border-rose-500/30 space-y-3">
+            <div className="p-4 rounded-2xl apple-card space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-bold text-white">
-                  <Flame className="w-4 h-4 text-rose-400 fill-rose-400" />
-                  <span>Import Active Workout Energy</span>
+                <div className="flex items-center gap-2 text-xs font-semibold text-white">
+                  <Flame className="w-4 h-4 text-[#ff453a]" />
+                  <span>Active Workout Energy</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-rose-300">
+                <span className="text-xs font-mono font-bold text-[#ff453a]">
                   {activeCalories} kcal
                 </span>
               </div>
@@ -144,12 +141,12 @@ export const HealthSyncModal: React.FC<HealthSyncModalProps> = ({ isOpen, onClos
                 step="50"
                 value={activeCalories}
                 onChange={(e) => setActiveCalories(Number(e.target.value))}
-                className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-400"
+                className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-[#ff453a]"
               />
 
-              <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-800">
-                <span className="text-slate-400">Calculated Fluid Sweated:</span>
-                <span className="font-mono font-bold text-rose-300">
+              <div className="flex items-center justify-between text-xs pt-1 border-t border-white/[0.08]">
+                <span className="text-neutral-400">Calculated Fluid Loss:</span>
+                <span className="font-mono font-bold text-white">
                   +{calculatedFluidLossMl} ml compensation
                 </span>
               </div>
@@ -157,7 +154,7 @@ export const HealthSyncModal: React.FC<HealthSyncModalProps> = ({ isOpen, onClos
               <button
                 type="button"
                 onClick={handleImportWorkoutCalories}
-                className="w-full py-2.5 rounded-xl bg-rose-500 hover:bg-rose-400 text-slate-950 font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 rounded-xl apple-btn-primary text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1.5 shadow"
               >
                 <Upload className="w-3.5 h-3.5" />
                 <span>Sync {activeCalories} kcal Sweat Loss (+{calculatedFluidLossMl}ml)</span>
@@ -165,43 +162,43 @@ export const HealthSyncModal: React.FC<HealthSyncModalProps> = ({ isOpen, onClos
             </div>
 
             {/* 2. Export to Apple HealthKit / Google Health Connect Schema */}
-            <div className="p-4 rounded-3xl glass-card-inner border border-slate-800 space-y-2.5">
+            <div className="p-4 rounded-2xl apple-card space-y-2.5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-bold text-white">
-                  <Smartphone className="w-4 h-4 text-cyan-400" />
+                <div className="flex items-center gap-2 text-xs font-semibold text-white">
+                  <Smartphone className="w-4 h-4 text-[#0a84ff]" />
                   <span>Apple HealthKit Export Schema</span>
                 </div>
-                <span className="text-[10px] font-mono text-cyan-300 font-bold">HKQuantityType</span>
+                <span className="text-[10px] font-mono text-neutral-400">HKQuantityType</span>
               </div>
 
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Export all historical water and beverage samples formatted for seamless direct import into Apple HealthKit (`HKQuantityTypeIdentifierDietaryWater`) or Google Health Connect.
+              <p className="text-[11px] text-neutral-400 leading-relaxed">
+                Export all historical water logs formatted for direct import into Apple Health (`HKQuantityTypeIdentifierDietaryWater`).
               </p>
 
               <button
                 type="button"
                 onClick={handleExportHealthKitJSON}
-                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 rounded-xl apple-btn-secondary text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Download HealthKit Sync Payload (.JSON)</span>
+                <span>Download HealthKit Sync File (.json)</span>
               </button>
             </div>
 
-            {/* Privacy & Battery Guarantee */}
-            <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-xs text-slate-300 flex items-start gap-2.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                <strong>100% On-Device & Zero Battery Drain:</strong> AquaFlow never transmits biometric health data to remote servers. All telemetry remains stored locally on your device.
+            {/* Privacy Guarantee */}
+            <div className="p-3.5 rounded-2xl apple-card text-xs text-neutral-300 flex items-start gap-2.5">
+              <ShieldCheck className="w-4 h-4 text-[#30d158] shrink-0 mt-0.5" />
+              <p className="text-[11px] text-neutral-400 leading-relaxed">
+                <strong>100% Private:</strong> AquaFlow processes all metabolic health data locally on your device without transmitting health telemetry to external servers.
               </p>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="pt-3 border-t border-slate-800">
+          <div className="pt-2 border-t border-white/[0.08] flex justify-end">
             <button
               onClick={onClose}
-              className="w-full py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-xs transition cursor-pointer"
+              className="px-5 py-2 rounded-xl apple-btn-secondary text-xs font-semibold transition cursor-pointer"
             >
               Done
             </button>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Droplet, Plus, Clock, Sparkles } from 'lucide-react';
+import { X, Droplet, Plus, Clock } from 'lucide-react';
 import { useWater } from '../context/WaterContext';
 import { BeverageType, BEVERAGE_DATABASE } from '../types/beverages';
 
@@ -11,7 +11,7 @@ interface CustomAmountModalProps {
 
 export const CustomAmountModal: React.FC<CustomAmountModalProps> = ({ isOpen, onClose }) => {
   const { addWater } = useWater();
-  const [amount, setAmount] = useState<number>(350);
+  const [amount, setAmount] = useState<number>(300);
   const [beverageType, setBeverageType] = useState<BeverageType>('water');
   const [beverageName, setBeverageName] = useState<string>('Pure Water');
   const [timeOffsetMinutes, setTimeOffsetMinutes] = useState<number>(0);
@@ -41,49 +41,49 @@ export const CustomAmountModal: React.FC<CustomAmountModalProps> = ({ isOpen, on
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-slate-950/90 backdrop-blur-lg"
+          className="absolute inset-0 bg-black/80 backdrop-blur-md"
         />
 
-        {/* Full Screen Modal Window */}
+        {/* Modal Window */}
         <motion.div
-          initial={{ scale: 0.94, opacity: 0, y: 20 }}
+          initial={{ scale: 0.96, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.94, opacity: 0, y: 20 }}
-          className="relative w-full max-w-xl h-[92vh] sm:h-auto sm:max-h-[88vh] rounded-3xl glass-surface-glow p-5 sm:p-7 z-10 overflow-hidden border border-cyan-500/40 shadow-2xl flex flex-col"
+          exit={{ scale: 0.96, opacity: 0, y: 15 }}
+          className="relative w-full max-w-lg rounded-3xl apple-glass-modal p-5 sm:p-6 z-10 overflow-hidden max-h-[90vh] flex flex-col space-y-4"
         >
           {/* Header */}
-          <div className="flex items-center justify-between pb-3.5 border-b border-slate-800 shrink-0">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2.5 rounded-2xl bg-cyan-500/20 text-cyan-300">
-                <Droplet className="w-5 h-5 fill-cyan-400/40" />
+          <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08] shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#1c1c1e] border border-white/[0.08] flex items-center justify-center text-lg">
+                <Droplet className="w-5 h-5 text-[#0a84ff]" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-black text-white font-heading">
+                <h3 className="text-base sm:text-lg font-bold text-white">
                   Log Custom Intake
                 </h3>
-                <p className="text-xs text-slate-400">Add any beverage volume or bottle size</p>
+                <p className="text-xs text-neutral-400">Add any volume or beverage</p>
               </div>
             </div>
 
             <button
               onClick={onClose}
-              className="p-2 rounded-2xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              className="p-1.5 rounded-full text-neutral-400 hover:text-white bg-white/[0.08] transition cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pr-1 py-4 space-y-4">
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-3.5 pr-1">
             {/* Amount Display & Visual Gauge */}
-            <div className="flex flex-col items-center justify-center p-5 rounded-3xl bg-slate-900/80 border border-cyan-500/30 text-center">
-              <span className="text-xs text-cyan-300 font-bold uppercase tracking-wider mb-1">
+            <div className="flex flex-col items-center justify-center p-5 rounded-2xl apple-card text-center">
+              <span className="text-[11px] text-neutral-400 font-semibold uppercase tracking-wider mb-1">
                 Volume
               </span>
               <div className="flex items-baseline gap-1">
@@ -93,13 +93,13 @@ export const CustomAmountModal: React.FC<CustomAmountModalProps> = ({ isOpen, on
                   max="4000"
                   value={amount}
                   onChange={(e) => setAmount(Math.max(0, Number(e.target.value)))}
-                  className="w-36 text-center text-4xl sm:text-5xl font-black font-heading text-white bg-transparent border-b-2 border-cyan-400 focus:outline-none"
+                  className="w-36 text-center text-4xl sm:text-5xl font-bold text-white bg-transparent border-b-2 border-[#0a84ff] focus:outline-none"
                 />
-                <span className="text-base font-bold text-slate-400">ml</span>
+                <span className="text-sm font-semibold text-neutral-400">ml</span>
               </div>
 
               {/* Slider */}
-              <div className="w-full mt-4 px-2">
+              <div className="w-full mt-3 px-2">
                 <input
                   type="range"
                   min="50"
@@ -107,18 +107,18 @@ export const CustomAmountModal: React.FC<CustomAmountModalProps> = ({ isOpen, on
                   step="25"
                   value={amount}
                   onChange={(e) => setAmount(Number(e.target.value))}
-                  className="w-full accent-cyan-400 cursor-pointer h-2 bg-slate-800 rounded-lg"
+                  className="w-full accent-[#0a84ff] cursor-pointer h-1.5 bg-neutral-800 rounded-lg"
                 />
               </div>
 
               {/* Quick Delta Pills */}
-              <div className="flex items-center gap-1.5 mt-4 flex-wrap justify-center">
+              <div className="flex items-center gap-1.5 mt-3 flex-wrap justify-center">
                 {[-100, -50, +50, +100, +250].map((delta) => (
                   <button
                     key={delta}
                     type="button"
                     onClick={() => handleQuickIncrement(delta)}
-                    className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-300 text-slate-300 text-xs font-bold transition cursor-pointer border border-slate-700"
+                    className="px-3 py-1 rounded-xl bg-black/40 hover:bg-[#0a84ff]/20 text-neutral-300 text-xs font-semibold transition cursor-pointer border border-white/[0.06]"
                   >
                     {delta > 0 ? `+${delta}` : delta} ml
                   </button>
@@ -128,8 +128,8 @@ export const CustomAmountModal: React.FC<CustomAmountModalProps> = ({ isOpen, on
 
             {/* Beverage Selector Grid */}
             <div className="space-y-2">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
-                Beverage Type
+              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
+                Beverage Type & Hydration Ratio
               </span>
               <div className="grid grid-cols-3 gap-2">
                 {(Object.keys(BEVERAGE_DATABASE) as BeverageType[]).map((type) => {
@@ -143,12 +143,12 @@ export const CustomAmountModal: React.FC<CustomAmountModalProps> = ({ isOpen, on
                       onClick={() => handleBeverageSelect(type)}
                       className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between cursor-pointer ${
                         isSelected
-                          ? 'bg-cyan-500 text-slate-950 font-bold border-cyan-400 shadow-md'
-                          : 'glass-surface border-slate-800 text-slate-300 hover:border-slate-700'
+                          ? 'bg-[#0a84ff] text-white border-[#0a84ff] shadow-sm'
+                          : 'apple-card text-neutral-300 hover:border-white/[0.2]'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-lg">
+                        <span className="text-base">
                           {type === 'coffee'
                             ? '☕'
                             : type === 'electrolyte'
@@ -162,34 +162,34 @@ export const CustomAmountModal: React.FC<CustomAmountModalProps> = ({ isOpen, on
                             : '💧'}
                         </span>
                         <span
-                          className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full ${
-                            isSelected ? 'bg-slate-950/20 text-slate-950' : 'bg-slate-800 text-cyan-300'
+                          className={`text-[9px] font-mono font-semibold px-1.5 py-0.2 rounded-full ${
+                            isSelected ? 'bg-black/20 text-white' : 'bg-neutral-800 text-neutral-400'
                           }`}
                         >
                           {Math.round(bev.factor * 100)}%
                         </span>
                       </div>
-                      <span className="text-xs font-bold truncate mt-2">{bev.name}</span>
+                      <span className="text-xs font-semibold truncate mt-1.5">{bev.name}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Time Offset (Did you drink this earlier?) */}
-            <div className="p-3.5 rounded-2xl glass-surface border border-slate-800 flex items-center justify-between">
+            {/* Time Offset */}
+            <div className="p-3.5 rounded-2xl apple-card flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-cyan-400" />
+                <Clock className="w-4 h-4 text-[#0a84ff]" />
                 <div>
-                  <span className="text-xs font-bold text-white block">Drank earlier?</span>
-                  <span className="text-[10px] text-slate-400">Log past time</span>
+                  <span className="text-xs font-semibold text-white block">Drank earlier?</span>
+                  <span className="text-[10px] text-neutral-400">Log past time</span>
                 </div>
               </div>
 
               <select
                 value={timeOffsetMinutes}
                 onChange={(e) => setTimeOffsetMinutes(Number(e.target.value))}
-                className="bg-slate-900 border border-slate-700 text-xs text-cyan-300 rounded-xl px-2.5 py-1.5 focus:outline-none font-medium"
+                className="bg-black/40 border border-white/[0.08] text-xs text-white rounded-xl px-2.5 py-1.5 focus:outline-none"
               >
                 <option value={0}>Just Now</option>
                 <option value={15}>15 mins ago</option>
@@ -200,12 +200,21 @@ export const CustomAmountModal: React.FC<CustomAmountModalProps> = ({ isOpen, on
             </div>
 
             {/* Submit Button */}
-            <button
-              type="submit"
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-sky-500 hover:from-cyan-400 hover:to-sky-400 text-slate-950 font-black text-xs transition cursor-pointer shadow-lg shadow-cyan-500/25 shrink-0"
-            >
-              Log +{amount} ml ({netHydration} ml net)
-            </button>
+            <div className="pt-2 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2.5 rounded-xl apple-btn-secondary text-xs font-semibold transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-5 py-2.5 rounded-xl apple-btn-primary text-xs font-semibold transition cursor-pointer shadow"
+              >
+                Log +{amount} ml ({netHydration} ml net)
+              </button>
+            </div>
           </form>
         </motion.div>
       </div>

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { Trophy, Sparkles, X, Flame, CheckCircle2, Heart } from 'lucide-react';
+import { Trophy, Sparkles, X, Flame } from 'lucide-react';
 import { useWater } from '../context/WaterContext';
 
 export const CelebrationModal: React.FC = () => {
@@ -9,9 +9,8 @@ export const CelebrationModal: React.FC = () => {
 
   useEffect(() => {
     if (isCelebrationOpen) {
-      // Fire confetti bursts from both sides
       const end = Date.now() + 2.5 * 1000;
-      const colors = ['#38bdf8', '#34d399', '#f59e0b', '#818cf8', '#ffffff'];
+      const colors = ['#0a84ff', '#30d158', '#ff9f0a', '#ffffff'];
 
       const frame = () => {
         confetti({
@@ -41,79 +40,80 @@ export const CelebrationModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={closeCelebration}
-          className="absolute inset-0 bg-slate-950/85 backdrop-blur-md"
+          className="absolute inset-0 bg-black/80 backdrop-blur-md"
         />
 
         {/* Modal Window */}
         <motion.div
-          initial={{ scale: 0.7, opacity: 0, y: 40 }}
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.7, opacity: 0, y: 40 }}
-          transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-          className="relative w-full max-w-md rounded-3xl glass-panel-glow p-7 z-10 text-center overflow-hidden border-2 border-emerald-400/50 shadow-[0_0_60px_rgba(52,211,153,0.3)]"
+          exit={{ scale: 0.9, opacity: 0, y: 20 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className="relative w-full max-w-md rounded-3xl apple-glass-modal p-6 sm:p-7 z-10 text-center overflow-hidden space-y-4"
         >
           {/* Close button */}
           <button
             onClick={closeCelebration}
-            className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-white transition cursor-pointer"
+            className="absolute top-4 right-4 p-1.5 rounded-full text-neutral-400 hover:text-white bg-white/[0.08] transition cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
 
-          {/* Trophy Icon with Floating Glow */}
-          <div className="relative inline-block mb-3">
+          {/* Trophy Icon */}
+          <div className="relative inline-block mt-2">
             <motion.div
-              animate={{ rotate: [0, -8, 8, 0], scale: [1, 1.1, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-              className="p-5 rounded-3xl bg-gradient-to-tr from-amber-400 via-emerald-400 to-cyan-400 text-slate-950 shadow-xl shadow-emerald-500/30"
+              animate={{ rotate: [0, -6, 6, 0], scale: [1, 1.05, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="p-4 rounded-3xl bg-[#30d158]/15 border border-[#30d158]/30 text-[#30d158] shadow-lg"
             >
-              <Trophy className="w-12 h-12" />
+              <Trophy className="w-10 h-10" />
             </motion.div>
-            <Sparkles className="w-6 h-6 text-yellow-300 absolute -top-2 -right-2 animate-bounce" />
           </div>
 
-          <h3 className="text-2xl font-black text-white font-heading tracking-tight">
-            Daily Goal Crushed! 🎉
-          </h3>
-          <p className="text-sm text-cyan-200 mt-1">
-            You completed your full <strong className="text-white">{todayRecord.goal} ml (4 Litres)</strong> hydration target!
-          </p>
+          <div>
+            <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              Daily Goal Completed! 🎉
+            </h3>
+            <p className="text-xs text-neutral-300 mt-1">
+              You achieved your full <strong className="text-white font-semibold">{todayRecord.goal} ml</strong> hydration target!
+            </p>
+          </div>
 
           {/* Streak & Stats Box */}
-          <div className="my-5 p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30 flex items-center justify-around">
+          <div className="p-4 rounded-2xl apple-card flex items-center justify-around">
             <div className="text-center">
-              <span className="text-[11px] font-bold text-slate-400 block uppercase">Total Drank</span>
-              <span className="text-xl font-black text-cyan-300 font-mono">
+              <span className="text-[10px] uppercase font-semibold text-neutral-400 block">Total Intake</span>
+              <span className="text-lg font-bold text-white font-mono">
                 {todayRecord.total} ml
               </span>
             </div>
 
-            <div className="w-px h-8 bg-slate-800" />
+            <div className="w-px h-8 bg-white/[0.08]" />
 
             <div className="text-center">
-              <span className="text-[11px] font-bold text-slate-400 block uppercase flex items-center justify-center gap-1">
-                <Flame className="w-3 h-3 text-amber-400 fill-amber-400" /> Streak
+              <span className="text-[10px] uppercase font-semibold text-neutral-400 block flex items-center justify-center gap-1">
+                <Flame className="w-3 h-3 text-[#ff9f0a] fill-[#ff9f0a]" /> Streak
               </span>
-              <span className="text-xl font-black text-amber-400 font-heading">
+              <span className="text-lg font-bold text-[#ff9f0a]">
                 {streakInfo.currentStreak} Days
               </span>
             </div>
           </div>
 
-          <p className="text-xs text-slate-300 italic mb-5">
-            "Optimal hydration boosts energy, sharpens focus, and accelerates recovery!"
+          <p className="text-xs text-neutral-400 italic">
+            "Optimal hydration accelerates recovery, sharpens focus, and maintains daily energy."
           </p>
 
           <button
             onClick={closeCelebration}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-slate-950 font-extrabold text-sm transition shadow-lg shadow-emerald-500/25 cursor-pointer"
+            className="w-full py-3 rounded-2xl apple-btn-primary text-xs font-semibold transition cursor-pointer shadow"
           >
             Keep It Up! 💧
           </button>

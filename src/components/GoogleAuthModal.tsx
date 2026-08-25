@@ -7,13 +7,7 @@ import {
   Check,
   Copy,
   KeyRound,
-  RotateCcw,
-  Sparkles,
-  Smartphone,
-  Lock,
-  User,
   Info,
-  ExternalLink,
 } from 'lucide-react';
 import {
   getOrCreateUserIdentity,
@@ -98,61 +92,61 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({ isOpen, onClos
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-slate-950/85 backdrop-blur-md"
+          className="absolute inset-0 bg-black/80 backdrop-blur-md"
         />
 
         {/* Modal Window */}
         <motion.div
-          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          initial={{ scale: 0.96, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="relative w-full max-w-md rounded-3xl glass-surface-glow p-5 sm:p-6 z-10 overflow-hidden border border-cyan-500/30 shadow-2xl space-y-4 max-h-[92vh] flex flex-col"
+          exit={{ scale: 0.96, opacity: 0, y: 15 }}
+          className="relative w-full max-w-md rounded-3xl apple-glass-modal p-5 sm:p-6 z-10 overflow-hidden space-y-4 max-h-[90vh] flex flex-col"
         >
           {/* Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-2xl bg-cyan-500/20 text-cyan-300">
-                <Cloud className="w-5 h-5" />
+          <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08] shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#1c1c1e] border border-white/[0.08] flex items-center justify-center text-lg">
+                <Cloud className="w-5 h-5 text-[#0a84ff]" />
               </div>
               <div>
-                <h3 className="text-base font-black text-white font-heading">
-                  Account Sync & Device Backup
+                <h3 className="text-base sm:text-lg font-bold text-white">
+                  Account Sync & Backup
                 </h3>
-                <p className="text-xs text-slate-400">
-                  Zero data loss on phone switch or factory reset
+                <p className="text-xs text-neutral-400">
+                  Zero data loss on phone switch or reset
                 </p>
               </div>
             </div>
 
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              className="p-1.5 rounded-full text-neutral-400 hover:text-white bg-white/[0.08] transition cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto pr-0.5 space-y-3.5">
+          <div className="flex-1 overflow-y-auto space-y-3.5 pr-1">
             {/* 1. Account Profile Card */}
-            <form onSubmit={handleSaveProfile} className="p-4 rounded-2xl glass-surface border border-slate-800 space-y-3">
+            <form onSubmit={handleSaveProfile} className="p-4 rounded-2xl apple-card space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                  Your Squad Profile
+                <span className="text-[10px] uppercase font-semibold text-neutral-400 tracking-wider">
+                  Squad Profile
                 </span>
                 {identity.isGoogleLinked ? (
-                  <span className="text-[10px] font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                  <span className="text-[10px] font-semibold text-[#30d158] bg-[#30d158]/15 px-2 py-0.5 rounded-full flex items-center gap-1">
                     <ShieldCheck className="w-3 h-3" />
                     Cloud Synced
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-500/30">
-                    Offline Key Protected
+                  <span className="text-[10px] font-semibold text-[#ff9f0a] bg-[#ff9f0a]/10 px-2 py-0.5 rounded-full">
+                    Key Protected
                   </span>
                 )}
               </div>
 
               {/* Avatar Selector */}
-              <div className="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar">
+              <div className="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar">
                 {['💧', '⚡', '🦁', '🌸', '🚀', '🔥', '🏆', '🌿', '⭐'].map((emoji) => (
                   <button
                     key={emoji}
@@ -160,8 +154,8 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({ isOpen, onClos
                     onClick={() => setEditAvatar(emoji)}
                     className={`p-2 text-xl rounded-xl border transition cursor-pointer shrink-0 ${
                       editAvatar === emoji
-                        ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-md'
-                        : 'bg-slate-900 border-slate-800'
+                        ? 'bg-[#0a84ff] text-white border-[#0a84ff]'
+                        : 'bg-black/30 border-white/[0.06]'
                     }`}
                   >
                     {emoji}
@@ -172,71 +166,71 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({ isOpen, onClos
               {/* Name & Email inputs */}
               <div className="space-y-2">
                 <div>
-                  <label className="text-[11px] text-slate-400 font-medium block mb-1">
-                    Display Name (shown to squad friends)
+                  <label className="text-[10px] uppercase font-semibold text-neutral-400 block mb-1">
+                    Display Name
                   </label>
                   <input
                     type="text"
                     required
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-black/40 border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#0a84ff]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-slate-400 font-medium block mb-1">
+                  <label className="text-[10px] uppercase font-semibold text-neutral-400 block mb-1">
                     Google / Backup Email (Optional)
                   </label>
                   <input
                     type="email"
-                    placeholder="e.g. nitish@gmail.com"
+                    placeholder="e.g. name@gmail.com"
                     value={editEmail}
                     onChange={(e) => setEditEmail(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-black/40 border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-[#0a84ff]"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition cursor-pointer shadow-md"
+                className="w-full py-2.5 rounded-xl apple-btn-primary text-xs font-semibold transition cursor-pointer shadow"
               >
-                {isSavedMsg ? '✓ Profile & Squads Saved!' : 'Save Profile & Update Squads'}
+                {isSavedMsg ? '✓ Profile Saved!' : 'Save Profile'}
               </button>
             </form>
 
             {/* 2. Personal Secret Sync Key */}
-            <div className="p-4 rounded-2xl bg-slate-900/90 border border-cyan-500/30 space-y-2">
+            <div className="p-4 rounded-2xl apple-card space-y-2">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-300">
-                  <KeyRound className="w-3.5 h-3.5" />
-                  <span>Your Secret Sync Key</span>
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-white">
+                  <KeyRound className="w-3.5 h-3.5 text-[#0a84ff]" />
+                  <span>Secret Sync Key</span>
                 </div>
-                <span className="text-[9px] text-slate-400 font-mono">1-Tap Phone Restore</span>
+                <span className="text-[10px] text-neutral-400 font-mono">1-Tap Restore</span>
               </div>
 
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                <span className="font-mono text-xs font-black text-white tracking-wider">
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/[0.06]">
+                <span className="font-mono text-xs font-bold text-white tracking-wider">
                   {identity.recoveryKey}
                 </span>
                 <button
                   onClick={handleCopyKey}
-                  className="p-1 rounded text-slate-400 hover:text-cyan-300 transition cursor-pointer"
+                  className="p-1 rounded text-neutral-400 hover:text-white transition cursor-pointer"
                   title="Copy Key"
                 >
-                  {copiedKey ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedKey ? <Check className="w-3.5 h-3.5 text-[#30d158]" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
               </div>
-              <p className="text-[10px] text-slate-400 leading-relaxed">
-                Save this key. If you buy a new phone or factory reset, entering this key restores all your history, streaks, and squads instantly!
+              <p className="text-[10px] text-neutral-400 leading-relaxed">
+                Save this key. Entering this key on any phone restores your streaks, history, and squads.
               </p>
             </div>
 
             {/* 3. Restore on New Device */}
-            <form onSubmit={handleRestore} className="p-4 rounded-2xl glass-surface border border-slate-800 space-y-2">
-              <label className="text-xs font-bold text-slate-300 block">
-                Switched Phones? Restore Existing Account:
+            <form onSubmit={handleRestore} className="p-4 rounded-2xl apple-card space-y-2">
+              <label className="text-xs font-semibold text-white block">
+                Restore Existing Account:
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -244,30 +238,22 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({ isOpen, onClos
                   placeholder="e.g. AQUA-7821-X9"
                   value={restoreKeyInput}
                   onChange={(e) => setRestoreKeyInput(e.target.value)}
-                  className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-cyan-300 font-mono font-bold focus:outline-none focus:border-cyan-400 uppercase"
+                  className="flex-1 bg-black/40 border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white font-mono font-bold focus:outline-none focus:border-[#0a84ff] uppercase"
                 />
                 <button
                   type="submit"
-                  className="py-2 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition cursor-pointer shrink-0"
+                  className="py-2 px-3.5 rounded-xl apple-btn-secondary text-xs font-semibold transition cursor-pointer shrink-0"
                 >
                   Restore
                 </button>
               </div>
 
               {restoreStatus && (
-                <p className="text-[11px] text-cyan-300 font-semibold text-center mt-1">
+                <p className="text-[11px] text-[#0a84ff] font-medium text-center mt-1">
                   {restoreStatus}
                 </p>
               )}
             </form>
-
-            {/* Free Developer Cost Note */}
-            <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 text-[10px] text-slate-400 flex items-start gap-2">
-              <Info className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
-              <p className="leading-relaxed">
-                <strong>Why this is 100% Free:</strong> AquaFlow uses local-first cryptographic sync keys and free client-side Google Identity SDK. No expensive database servers are required, keeping running costs at <strong>$0.00 forever</strong>.
-              </p>
-            </div>
           </div>
         </motion.div>
       </div>
