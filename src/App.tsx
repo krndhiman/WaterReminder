@@ -148,10 +148,11 @@ const MainLayout: React.FC = () => {
           onOpenSquads={() => setIsSquadsModalOpen(true)}
           onOpenGoogleSync={() => setIsGoogleModalOpen(true)}
           onOpenAbout={() => setIsAboutModalOpen(true)}
+          onOpenSchedule={() => setIsScheduleModalOpen(true)}
         />
 
         {/* System Notification Permission & Status Banner */}
-        <NotificationBanner />
+        <NotificationBanner onOpenSchedule={() => setIsScheduleModalOpen(true)} />
 
         {/* ========================================================
             TAB 1: HYDRATE (The Core, Clean Daily Screen)

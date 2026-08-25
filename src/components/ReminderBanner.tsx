@@ -7,6 +7,7 @@ import {
   Users,
   Cloud,
   Info,
+  Bell,
 } from 'lucide-react';
 import { useWater } from '../context/WaterContext';
 
@@ -17,6 +18,7 @@ interface ReminderBannerProps {
   onOpenSquads: () => void;
   onOpenGoogleSync: () => void;
   onOpenAbout: () => void;
+  onOpenSchedule: () => void;
 }
 
 export const ReminderBanner: React.FC<ReminderBannerProps> = ({
@@ -26,12 +28,14 @@ export const ReminderBanner: React.FC<ReminderBannerProps> = ({
   onOpenSquads,
   onOpenGoogleSync,
   onOpenAbout,
+  onOpenSchedule,
 }) => {
   const {
     streakInfo,
     weather,
     isMuted,
     toggleMute,
+    schedule,
   } = useWater();
 
   return (
@@ -83,8 +87,18 @@ export const ReminderBanner: React.FC<ReminderBannerProps> = ({
           </div>
         </div>
 
-        {/* Right Action Icons (Quiet Minimalist Circles) */}
+        {/* Right Action Icons */}
         <div className="flex items-center gap-1.5 shrink-0">
+          {/* Reminders / Schedule Button */}
+          <button
+            onClick={onOpenSchedule}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#141416] border border-white/[0.08] hover:border-white/[0.2] text-xs font-semibold text-neutral-200 transition cursor-pointer"
+            title="Reminder Settings & Schedule"
+          >
+            <Bell className="w-3.5 h-3.5 text-[#0a84ff]" />
+            <span className="hidden sm:inline">Alerts</span>
+          </button>
+
           {/* Squads Button */}
           <button
             onClick={onOpenSquads}

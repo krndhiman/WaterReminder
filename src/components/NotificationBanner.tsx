@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, BellRing, Check, AlertCircle, Sparkles, X, Volume2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Bell, BellRing, Check, AlertCircle, Sparkles, X, Volume2, ShieldCheck, Clock } from 'lucide-react';
 import { useWater } from '../context/WaterContext';
 import {
   requestNotificationPermission,
@@ -8,15 +8,23 @@ import {
   sendBrowserNotification,
 } from '../utils/notifications';
 
-export const NotificationBanner: React.FC = () => {
+interface NotificationBannerProps {
+  onOpenSchedule?: () => void;
+}
+
+export const NotificationBanner: React.FC<NotificationBannerProps> = ({ onOpenSchedule }) => {
   const { schedule, updateSchedule, triggerManualReminderTest } = useWater();
   const [permission, setPermission] = useState<string>(getNotificationPermission());
-  const [isDismissed, setIsDismissed] = useState<boolean>(false);
   const [testSent, setTestSent] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    setPermission(getNotificationPermission());
+    // Check real browser permission on mount
+    const perm = getNotificationPermission();
+    setPermission(perm);
+    if (perm === 'granted' && !schedule.browserNotifications) {
+      updateSchedule({ browserNotifications: true });
+    }
   }, []);
 
   const handleEnableNotifications = async () => {
@@ -29,13 +37,14 @@ export const NotificationBanner: React.FC = () => {
       setTestSent(true);
       // Trigger instant real OS test notification
       await sendBrowserNotification('💧 AquaFlow Reminders Active!', {
-        body: 'System notifications are working! You will now receive reminders even when the app is in the background.',
+        body: `System notifications are active! You will receive reminders every ${schedule.intervalMinutes} minutes.`,
+        requireInteraction: true,
       });
       setTimeout(() => setTestSent(false), 4000);
     } else {
       setErrorMsg(
         result.errorMessage ||
-          'Notifications are blocked. Please click the icon (🔒) near the URL in your browser to allow notifications.'
+          'Notifications are blocked. Click the icon (🔒 or ⚙️) next to the URL address to allow notifications for this site.'
       );
     }
   };
@@ -49,91 +58,116 @@ export const NotificationBanner: React.FC = () => {
     setTestSent(true);
     triggerManualReminderTest();
     await sendBrowserNotification('💧 AquaFlow Hydration Check!', {
-      body: 'Time to drink some fresh water! Your system notifications are working perfectly.',
+      body: `Time to drink some fresh water! Next reminder in ${schedule.intervalMinutes} mins.`,
       requireInteraction: true,
     });
     setTimeout(() => setTestSent(false), 3000);
   };
 
-  if (isDismissed) return null;
-
   return (
     <div className="w-full max-w-xl mx-auto px-0.5">
-      {permission !== 'granted' ? (
-        // Prompt Banner to Enable System Notifications
-        <motion.div
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-3.5 rounded-3xl apple-card border border-[#0a84ff]/30 bg-[#0a84ff]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md"
-        >
+      {/* Prominent Apple-Style Notification Card */}
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`p-3.5 sm:p-4 rounded-3xl apple-card border transition-all shadow-md ${
+          permission === 'granted'
+            ? 'bg-[#161618] border-white/[0.08]'
+            : 'bg-[#0a84ff]/10 border-[#0a84ff]/30'
+        }`}
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {/* Status & Description */}
           <div className="flex items-start gap-3 min-w-0">
-            <div className="p-2 rounded-xl bg-[#0a84ff] text-white shrink-0 shadow-sm mt-0.5 sm:mt-0">
-              <BellRing className="w-4 h-4 animate-bounce" />
+            <div
+              className={`p-2.5 rounded-2xl shrink-0 ${
+                permission === 'granted'
+                  ? 'bg-[#30d158]/15 text-[#30d158]'
+                  : 'bg-[#0a84ff] text-white shadow-md'
+              }`}
+            >
+              {permission === 'granted' ? (
+                <Bell className="w-4 h-4" />
+              ) : (
+                <BellRing className="w-4 h-4 animate-bounce" />
+              )}
             </div>
+
             <div className="min-w-0">
-              <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
-                <span>Enable System & Lock Screen Reminders</span>
-                <span className="text-[9px] bg-[#0a84ff] text-white px-1.5 py-0.2 rounded font-semibold uppercase">
-                  Important
+              <div className="flex items-center gap-2 flex-wrap">
+                <h4 className="text-xs sm:text-sm font-bold text-white">
+                  {permission === 'granted'
+                    ? 'System Reminders: Active'
+                    : 'Enable System & Lock Screen Reminders'}
+                </h4>
+                <span
+                  className={`text-[9px] font-bold px-2 py-0.2 rounded-full uppercase ${
+                    permission === 'granted'
+                      ? 'bg-[#30d158]/15 text-[#30d158] border border-[#30d158]/30'
+                      : 'bg-[#0a84ff] text-white'
+                  }`}
+                >
+                  {permission === 'granted' ? `Every ${schedule.intervalMinutes}m` : 'Action Needed'}
                 </span>
-              </h4>
-              <p className="text-[11px] text-neutral-300 mt-0.5">
-                Receive notifications even when your phone is locked or browser is in the background.
+              </div>
+
+              <p className="text-[11px] text-neutral-400 mt-0.5">
+                {permission === 'granted'
+                  ? 'Reminders will pop up on your lock screen & desktop even when the app is in the background.'
+                  : 'Receive lock-screen alerts & sound even when your phone is locked or browser is minimized.'}
               </p>
             </div>
           </div>
 
+          {/* Action Buttons */}
           <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-            <button
-              onClick={handleEnableNotifications}
-              className="px-3.5 py-1.5 rounded-xl apple-btn-primary text-xs font-semibold shadow transition cursor-pointer"
-            >
-              Turn On Alerts
-            </button>
-            <button
-              onClick={() => setIsDismissed(true)}
-              className="p-1.5 rounded-xl text-neutral-400 hover:text-white transition cursor-pointer"
-              title="Dismiss"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          {errorMsg && (
-            <div className="w-full mt-2 p-2.5 rounded-xl bg-rose-950/60 border border-rose-500/40 text-[11px] text-rose-200 flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
-        </motion.div>
-      ) : (
-        // Confirmation Banner with Quick Test Trigger
-        <div className="p-2.5 rounded-2xl apple-card bg-[#161618] border border-white/[0.06] flex items-center justify-between text-xs px-3">
-          <div className="flex items-center gap-2 text-neutral-300">
-            <div className="w-2 h-2 rounded-full bg-[#30d158] shadow-[0_0_8px_#30d158]" />
-            <span className="text-[11px] font-medium text-neutral-300">
-              System Notifications Active (Every {schedule.intervalMinutes}m)
-            </span>
-          </div>
-
-          <button
-            onClick={handleTestNotification}
-            className="text-[11px] font-semibold text-[#0a84ff] hover:text-white transition cursor-pointer flex items-center gap-1"
-          >
-            {testSent ? (
-              <>
-                <Check className="w-3 h-3 text-[#30d158]" />
-                <span className="text-[#30d158]">Test Sent!</span>
-              </>
+            {permission !== 'granted' ? (
+              <button
+                onClick={handleEnableNotifications}
+                className="px-4 py-2 rounded-xl apple-btn-primary text-xs font-semibold shadow-md transition cursor-pointer flex items-center gap-1.5"
+              >
+                <Bell className="w-3.5 h-3.5" />
+                <span>Turn On Alerts</span>
+              </button>
             ) : (
-              <>
-                <Bell className="w-3 h-3" />
-                <span>Test Notification</span>
-              </>
+              <button
+                onClick={handleTestNotification}
+                className="px-3.5 py-2 rounded-xl bg-[#1c1c1e] hover:bg-[#2c2c2e] border border-white/[0.08] text-xs font-semibold text-[#0a84ff] hover:text-white transition cursor-pointer flex items-center gap-1.5"
+              >
+                {testSent ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-[#30d158]" />
+                    <span className="text-[#30d158]">Test Sent!</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5 text-[#0a84ff]" />
+                    <span>Test Notification</span>
+                  </>
+                )}
+              </button>
             )}
-          </button>
+
+            {onOpenSchedule && (
+              <button
+                onClick={onOpenSchedule}
+                className="p-2 rounded-xl bg-[#1c1c1e] hover:bg-[#2c2c2e] border border-white/[0.08] text-neutral-400 hover:text-white transition cursor-pointer text-xs"
+                title="Change Reminder Schedule & Times"
+              >
+                <Clock className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
-      )}
+
+        {/* Error message / blocked troubleshooting */}
+        {errorMsg && (
+          <div className="mt-3 p-3 rounded-2xl bg-rose-950/60 border border-rose-500/40 text-[11px] text-rose-200 flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
+      </motion.div>
     </div>
   );
 };
