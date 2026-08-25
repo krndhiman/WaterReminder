@@ -32,6 +32,20 @@
 
   * {
     box-sizing: border-box !important;
+    /* Prevent text selection on non-interactive elements (stops browser copy/Google popup on tap) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+
+  /* Re-enable text selection for actual input/text fields */
+  input,
+  textarea,
+  [contenteditable],
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    user-select: text;
   }
 
   .font-heading {
