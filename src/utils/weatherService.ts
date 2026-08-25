@@ -1,6 +1,6 @@
 import { WeatherData, CitySearchResult } from '../types/weather';
 
-const WEATHER_STORAGE_KEY = 'aquaflow_weather_cache_v1';
+const WEATHER_STORAGE_KEY = 'aquaflow_weather_cache_v2';
 
 // Open-Meteo Weather Code interpretation
 export const interpretWeatherCode = (code: number, isDay: boolean = true): { text: string; icon: string } => {
