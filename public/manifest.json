@@ -1,18 +1,30 @@
 {
-  "name": "AquaFlow - 4L Water Intake Reminder",
+  "name": "AquaFlow — Smart Hydration Tracker",
   "short_name": "AquaFlow",
-  "description": "Fluid, gamified 4 Litre water intake reminder and hydration tracker",
+  "description": "Intelligent water intake reminder and daily hydration pacer",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#030712",
-  "theme_color": "#0284c7",
+  "background_color": "#000000",
+  "theme_color": "#0a84ff",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "192x192 512x512",
-      "type": "image/svg+xml",
+      "src": "/icon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }

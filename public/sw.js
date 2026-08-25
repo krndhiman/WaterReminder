@@ -1,5 +1,5 @@
 // Enhanced Service Worker for AquaFlow Background Notifications & PWA
-const CACHE_NAME = 'aquaflow-v3';
+const CACHE_NAME = 'aquaflow-v5';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -48,8 +48,8 @@ self.addEventListener('message', (event) => {
   if (event.data.type === 'SHOW_NOTIFICATION') {
     const { title, options } = event.data;
     self.registration.showNotification(title || '💧 AquaFlow Hydration Check', {
-      icon: '/favicon.svg',
-      badge: '/favicon.svg',
+      icon: '/icon.jpg',
+      badge: '/icon.jpg',
       vibrate: [200, 100, 200, 100, 400],
       requireInteraction: true,
       tag: 'aquaflow-reminder',
@@ -77,8 +77,8 @@ self.addEventListener('message', (event) => {
 
       backgroundTimerId = setTimeout(() => {
         self.registration.showNotification(scheduledTitle, {
-          icon: '/favicon.svg',
-          badge: '/favicon.svg',
+          icon: '/icon.jpg',
+          badge: '/icon.jpg',
           body: scheduledBody,
           vibrate: [200, 100, 200, 100, 400],
           requireInteraction: true,
