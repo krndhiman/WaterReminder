@@ -102,6 +102,11 @@ export const ReminderBanner: React.FC<ReminderBannerProps> = ({
                   +{weather.recommendedAdjustmentMl}ml
                 </span>
               )}
+              {weather && (
+                <span className="text-neutral-600 shrink-0">
+                  · {Math.round((Date.now() - weather.fetchedAt) / 60000)}m ago
+                </span>
+              )}
             </button>
           </div>
         </div>

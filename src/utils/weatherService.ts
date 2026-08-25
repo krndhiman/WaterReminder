@@ -125,7 +125,7 @@ export const fetchWeatherByCoords = async (
   cityName: string = 'Current Location',
   countryName: string = ''
 ): Promise<WeatherData> => {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,uv_index&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,uv_index,surface_pressure&timezone=auto&models=best_match&forecast_days=1`;
 
   const res = await fetch(url);
   if (!res.ok) throw new Error('Failed to fetch weather data');

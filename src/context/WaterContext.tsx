@@ -324,14 +324,28 @@ export const WaterProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   }, [weather, fetchWeatherByGPS]);
 
-  // Initial weather load if cache is missing or stale (>2 hours)
+  // Initial weather load if cache is missing or stale (>20 minutes)
   useEffect(() => {
-    if (!weather || Date.now() - weather.fetchedAt > 2 * 60 * 60 * 1000) {
+    if (!weather || Date.now() - weather.fetchedAt > 20 * 60 * 1000) {
       if (profile.environmental.cityName && profile.environmental.cityName !== 'Current Location') {
         fetchWeatherForCity(profile.environmental.cityName);
       }
     }
   }, []);
+
+  // Auto-refresh weather every 20 minutes while app is open
+  useEffect(() => {
+    const REFRESH_INTERVAL = 20 * 60 * 1000; // 20 minutes
+    const interval = setInterval(() => {
+      if (weather) {
+        // Silently refresh in background
+        fetchWeatherByCoords(weather.latitude, weather.longitude, weather.city, weather.country)
+          .then(setWeather)
+          .catch(() => {}); // silent fail — keep old data on error
+      }
+    }, REFRESH_INTERVAL);
+    return () => clearInterval(interval);
+  }, [weather]);
 
   // Update dynamic goal in today's record
   useEffect(() => {
