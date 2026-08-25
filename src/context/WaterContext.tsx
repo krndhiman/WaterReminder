@@ -147,8 +147,8 @@ export const WaterProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (env.liveWeatherEnabled && weather) {
       goal += weather.recommendedAdjustmentMl;
     } else {
-      if (env.climate === 'tropical') goal += 400;
-      if (env.climate === 'dry_heat') goal += 750;
+      if (env.climate === 'tropical') goal += 350;
+      if (env.climate === 'dry_heat') goal += 600;
     }
 
     if (env.acOffice) goal += 200;
@@ -160,10 +160,15 @@ export const WaterProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (clinical.lifeStage === 'pregnancy') goal += 300;
     if (clinical.lifeStage === 'breastfeeding') goal += 700;
     if (clinical.lifeStage === 'fluid_restriction' && clinical.maxDailyLimit) {
-      goal = clinical.maxDailyLimit;
+      return clinical.maxDailyLimit;
     }
 
-    return goal;
+    // Clinical Safety Ceiling (Hyponatremia / Fluid Overload Guardrail):
+    // Standard healthy physiology caps safe daily fluid between 45-50 ml/kg (ACSM / EFSA)
+    const userWeight = profile.weightKg || 70;
+    const safeDailyCeiling = Math.min(4800, Math.max(3000, Math.round(userWeight * 50)));
+
+    return Math.min(goal, safeDailyCeiling);
   }, [profile, weather]);
 
   const todayStr = getTodayDateString();

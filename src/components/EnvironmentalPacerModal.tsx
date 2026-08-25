@@ -22,9 +22,9 @@ export const EnvironmentalPacerModal: React.FC<EnvironmentalPacerModalProps> = (
     env.liveWeatherEnabled && weather
       ? weather.recommendedAdjustmentMl
       : env.climate === 'tropical'
-      ? 400
+      ? 350
       : env.climate === 'dry_heat'
-      ? 750
+      ? 600
       : 0;
 
   const acAdditional = env.acOffice ? 200 : 0;

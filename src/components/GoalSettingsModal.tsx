@@ -9,9 +9,12 @@ interface GoalSettingsModalProps {
 }
 
 export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ isOpen, onClose }) => {
-  const { profile, updateProfile, updateDailyGoal } = useWater();
+  const { profile, updateProfile, updateDailyGoal, weather } = useWater();
   const [goalInput, setGoalInput] = useState<number>(profile.dailyGoal || 4000);
   const [activeTab, setActiveTab] = useState<'manual' | 'calculator'>('manual');
+
+  // Is live weather currently active?
+  const liveWeatherActive = !!(weather && profile.environmental?.liveWeatherEnabled);
 
   // Calculator inputs
   const [weightKg, setWeightKg] = useState<number>(profile.weightKg || 70);
@@ -22,15 +25,29 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ isOpen, on
     profile.climate || 'temperate'
   );
 
-  // Scientific calculation: 35ml per kg bodyweight + activity + climate
+  // Sync state when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setGoalInput(profile.dailyGoal || 4000);
+      setWeightKg(profile.weightKg || 70);
+      setActivity(profile.activityLevel || 'moderate');
+      setClimate(profile.climate || 'temperate');
+    }
+  }, [isOpen, profile]);
+
+  // Scientific calculation: 35ml per kg bodyweight + activity
+  // Climate adjustment is SKIPPED when live weather is active (weather handles it dynamically)
   const calculateRecommendedIntake = () => {
     let base = weightKg * 35;
     if (activity === 'moderate') base += 500;
     if (activity === 'active') base += 1000;
     if (activity === 'athlete') base += 1500;
 
-    if (climate === 'tropical') base += 400;
-    if (climate === 'hot_dry') base += 750;
+    // Only add static climate bonus if live weather is NOT set up
+    if (!liveWeatherActive) {
+      if (climate === 'tropical') base += 350;
+      if (climate === 'hot_dry') base += 600;
+    }
 
     return Math.round(base / 50) * 50;
   };
@@ -209,20 +226,29 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ isOpen, on
                   />
                 </div>
 
-                {/* Climate */}
+                {/* Climate — hidden when live weather is active */}
                 <div className="p-3.5 rounded-2xl apple-card">
                   <label className="text-[10px] uppercase font-semibold text-neutral-400 block mb-1">
                     Climate
                   </label>
-                  <select
-                    value={climate}
-                    onChange={(e) => setClimate(e.target.value as any)}
-                    className="w-full bg-black/40 border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#0a84ff]"
-                  >
-                    <option value="temperate">Temperate / Mild</option>
-                    <option value="tropical">Hot / Tropical (+400ml)</option>
-                    <option value="hot_dry">Hot & Dry (+750ml)</option>
-                  </select>
+                  {liveWeatherActive ? (
+                    <div className="flex items-center gap-1.5 py-1.5">
+                      <span className="text-base">{weather!.conditionIcon}</span>
+                      <span className="text-[11px] text-[#30d158] font-medium leading-tight">
+                        Live weather active — climate handled automatically
+                      </span>
+                    </div>
+                  ) : (
+                    <select
+                      value={climate}
+                      onChange={(e) => setClimate(e.target.value as any)}
+                      className="w-full bg-black/40 border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#0a84ff]"
+                    >
+                      <option value="temperate">Temperate / Mild</option>
+                      <option value="tropical">Hot / Tropical (+400ml)</option>
+                      <option value="hot_dry">Hot & Dry (+750ml)</option>
+                    </select>
+                  )}
                 </div>
               </div>
 
@@ -258,13 +284,13 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ isOpen, on
               <div className="p-4 rounded-2xl apple-card flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-[#0a84ff] block">
-                    Calculated Recommendation
+                    Base Daily Recommendation
                   </span>
                   <span className="text-2xl font-bold text-white">
                     {calculatedValue.toLocaleString()} ml
                   </span>
                   <span className="text-[11px] text-neutral-400 block">
-                    ({(calculatedValue / 1000).toFixed(1)} Liters / day)
+                    ({(calculatedValue / 1000).toFixed(1)} Liters / day • 35 ml/kg baseline)
                   </span>
                 </div>
 
@@ -276,6 +302,30 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ isOpen, on
                   Apply Target
                 </button>
               </div>
+
+              {/* Live weather addition preview & safety guarantee */}
+              {liveWeatherActive && weather && (
+                <div className="p-3.5 rounded-2xl bg-[#0a84ff]/10 border border-[#0a84ff]/20 space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-neutral-300 flex items-center gap-1.5">
+                      <span>{weather.conditionIcon}</span>
+                      <span>Live Weather ({weather.city.split(',')[0]}):</span>
+                    </span>
+                    <span className="text-[#ff9f0a] font-semibold font-mono">
+                      +{weather.recommendedAdjustmentMl} ml
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs pt-1 border-t border-white/[0.08]">
+                    <span className="font-semibold text-white">Today's Total Target:</span>
+                    <span className="font-bold text-[#0a84ff] font-mono">
+                      {(calculatedValue + weather.recommendedAdjustmentMl).toLocaleString()} ml
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-neutral-400 leading-tight pt-0.5">
+                    🛡️ <span className="text-neutral-300 font-medium">Hyponatremia Protected:</span> Intake is safely bounded to prevent fluid overload and electrolyte dilution.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </motion.div>

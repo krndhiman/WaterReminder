@@ -1,6 +1,6 @@
 import { WeatherData, CitySearchResult } from '../types/weather';
 
-const WEATHER_STORAGE_KEY = 'aquaflow_weather_cache_v2';
+const WEATHER_STORAGE_KEY = 'aquaflow_weather_cache_v3';
 
 // Open-Meteo Weather Code interpretation
 export const interpretWeatherCode = (code: number, isDay: boolean = true): { text: string; icon: string } => {
@@ -40,7 +40,7 @@ export const interpretWeatherCode = (code: number, isDay: boolean = true): { tex
   }
 };
 
-// Calculate scientific water intake compensation based on real meteorological metrics
+// Calculate scientific water intake compensation based on real meteorological metrics (ACSM & EFSA standards)
 export const calculateWeatherHydrationAdjustment = (
   temp: number,
   apparentTemp: number,
@@ -50,43 +50,52 @@ export const calculateWeatherHydrationAdjustment = (
   let adjustment = 0;
   const reasons: string[] = [];
 
-  const effectiveTemp = Math.max(temp, apparentTemp);
+  // Effective thermal temperature: blend ambient temperature with feels-like (apparent temp)
+  // In warm/hot weather (>= 26°C), heat index elevates cutaneous vasodilation and sweat rate.
+  // In mild/cool weather, high humidity actually prevents dehydration by lowering respiratory vapor loss.
+  const effectiveTemp =
+    temp >= 26
+      ? Math.max(temp, temp * 0.4 + apparentTemp * 0.6)
+      : temp;
 
-  // 1. Heat & Thermal Load
+  // 1. Thermal Load & Insensible Perspiration Compensation (Physiologically calibrated)
   if (effectiveTemp >= 38) {
-    adjustment += 950;
-    reasons.push(`🔥 Extreme Heat (${effectiveTemp.toFixed(1)}°C feels like): High cutaneous sweat rate requires +950 ml.`);
-  } else if (effectiveTemp >= 32) {
-    const heatAdd = Math.round((effectiveTemp - 22) * 60);
+    const heatAdd = Math.min(650, 400 + Math.round((effectiveTemp - 38) * 50));
     adjustment += heatAdd;
-    reasons.push(`☀️ High Temperature (${effectiveTemp.toFixed(1)}°C): Sweat loss compensation adds +${heatAdd} ml.`);
-  } else if (effectiveTemp >= 24) {
-    const warmAdd = Math.round((effectiveTemp - 22) * 45);
+    reasons.push(`🔥 Extreme Heat (${effectiveTemp.toFixed(1)}°C thermal load): Elevated thermoregulatory sweat compensation (+${heatAdd} ml).`);
+  } else if (effectiveTemp >= 32) {
+    const heatAdd = Math.round(200 + (effectiveTemp - 32) * 35);
+    adjustment += heatAdd;
+    reasons.push(`☀️ High Temperature (${effectiveTemp.toFixed(1)}°C feels like): Moderate sweat loss compensation (+${heatAdd} ml).`);
+  } else if (effectiveTemp >= 25) {
+    const warmAdd = Math.round((effectiveTemp - 24) * 25);
     adjustment += warmAdd;
-    reasons.push(`🌤️ Warm Weather (${effectiveTemp.toFixed(1)}°C): Mild perspiration adds +${warmAdd} ml.`);
+    reasons.push(`🌤️ Warm Weather (${effectiveTemp.toFixed(1)}°C): Mild insensible perspiration (+${warmAdd} ml).`);
   } else if (effectiveTemp <= 5) {
-    adjustment += 150;
-    reasons.push(`❄️ Cold Weather (${effectiveTemp.toFixed(1)}°C): Respiratory vapor loss and cold diuresis add +150 ml.`);
+    adjustment += 100;
+    reasons.push(`❄️ Cold Weather (${effectiveTemp.toFixed(1)}°C): Respiratory vapor loss and cold diuresis (+100 ml).`);
   } else {
-    reasons.push(`🍃 Mild Comfort Zone (${effectiveTemp.toFixed(1)}°C): Standard baseline hydration is optimal.`);
+    reasons.push(`🍃 Mild Comfort Zone (${effectiveTemp.toFixed(1)}°C): Standard baseline hydration is optimal (0 ml added).`);
   }
 
-  // 2. Humidity Factors
-  if (humidity <= 30) {
-    adjustment += 150;
-    reasons.push(`💨 Low Humidity (${humidity}%): Dry ambient air accelerates skin evaporation (+150 ml).`);
-  } else if (humidity >= 75 && effectiveTemp >= 28) {
-    adjustment += 200;
-    reasons.push(`💦 High Humidity Muggy Heat (${humidity}%): Impaired sweat evaporation elevates core temperature (+200 ml).`);
+  // 2. Humidity Factors (Air dryness vs vapor saturation)
+  if (humidity <= 25) {
+    // Very dry ambient air accelerates skin evaporation
+    adjustment += 100;
+    reasons.push(`💨 Dry Ambient Air (${humidity}%): Accelerates transepidermal water loss (+100 ml).`);
   }
 
-  // 3. UV Radiation
-  if (uvIndex >= 7) {
-    adjustment += 150;
-    reasons.push(`☀️ High Solar UV Index (${uvIndex}): Elevates metabolic heat dissipation load (+150 ml).`);
+  // 3. Solar UV Radiation Load
+  if (uvIndex >= 8 && effectiveTemp >= 28) {
+    adjustment += 100;
+    reasons.push(`☀️ High Solar UV Index (${uvIndex}): Elevates metabolic heat dissipation load (+100 ml).`);
   }
 
-  return { adjustmentMl: Math.round(adjustment), reasons };
+  // Strict Physiological Safety Cap: Ambient weather alone should never exceed +650 ml/day
+  // to protect against excessive fluid intake and dilutional hyponatremia.
+  const boundedAdjustment = Math.min(650, Math.max(0, Math.round(adjustment)));
+
+  return { adjustmentMl: boundedAdjustment, reasons };
 };
 
 // Search cities using Open-Meteo Geocoding
