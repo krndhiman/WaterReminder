@@ -1,5 +1,5 @@
 // Enhanced Service Worker for AquaFlow Background Notifications & PWA
-const CACHE_NAME = 'aquaflow-v2';
+const CACHE_NAME = 'aquaflow-v3';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -55,8 +55,8 @@ self.addEventListener('message', (event) => {
       tag: 'aquaflow-reminder',
       renotify: true,
       actions: [
-        { action: 'log_250', title: '🥛 +250ml' },
-        { action: 'log_500', title: '🥤 +500ml' },
+        { action: 'log_300', title: '💧 +300ml Water' },
+        { action: 'log_500', title: '🥤 +500ml Bottle' },
         { action: 'snooze_15', title: '⏳ Snooze 15m' },
       ],
       ...options,
@@ -85,8 +85,8 @@ self.addEventListener('message', (event) => {
           tag: 'aquaflow-reminder',
           renotify: true,
           actions: [
-            { action: 'log_250', title: '🥛 +250ml' },
-            { action: 'log_500', title: '🥤 +500ml' },
+            { action: 'log_300', title: '💧 +300ml Water' },
+            { action: 'log_500', title: '🥤 +500ml Bottle' },
             { action: 'snooze_15', title: '⏳ Snooze 15m' },
           ],
         });

@@ -155,8 +155,8 @@ export const sendBrowserNotification = async (
           renotify: true,
           requireInteraction: options?.requireInteraction ?? true,
           actions: options?.actions || [
-            { action: 'log_250', title: '🥛 +250ml' },
-            { action: 'log_500', title: '🥤 +500ml' },
+            { action: 'log_300', title: '💧 +300ml Water' },
+            { action: 'log_500', title: '🥤 +500ml Bottle' },
             { action: 'snooze_15', title: '⏳ Snooze 15m' },
           ],
           ...options,
