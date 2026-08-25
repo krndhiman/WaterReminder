@@ -13,7 +13,7 @@ interface Bubble {
 }
 
 export const LiquidBottle: React.FC<{ onQuickAdd?: () => void }> = ({ onQuickAdd }) => {
-  const { selectedRecord, chugWarning, clearChugWarning } = useWater();
+  const { selectedRecord, chugWarning, clearChugWarning, profile, weather } = useWater();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const grossTotal = selectedRecord.total;
@@ -211,10 +211,23 @@ export const LiquidBottle: React.FC<{ onQuickAdd?: () => void }> = ({ onQuickAdd
             <span className="text-sm font-semibold text-neutral-400">ml</span>
           </div>
 
-          <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
-            <span>Goal: {selectedRecord.goal.toLocaleString()} ml</span>
-            <span>•</span>
-            <span className="font-semibold text-[#0a84ff]">{percentage}%</span>
+          <div className="flex flex-col items-center gap-0.5 mt-0.5">
+            {/* Base goal + weather breakdown */}
+            {weather && weather.recommendedAdjustmentMl > 0 ? (
+              <div className="flex items-center gap-1 text-[10px] text-neutral-500 flex-wrap justify-center">
+                <span className="text-neutral-400 font-medium">{profile.dailyGoal.toLocaleString()} ml base</span>
+                <span>+</span>
+                <span className="text-[#ff9f0a] font-medium">{weather.recommendedAdjustmentMl} ml {weather.conditionIcon}</span>
+                <span>=</span>
+                <span className="text-[#0a84ff] font-semibold">{selectedRecord.goal.toLocaleString()} ml today</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 text-xs text-neutral-400">
+                <span>Goal: {selectedRecord.goal.toLocaleString()} ml</span>
+                <span>•</span>
+                <span className="font-semibold text-[#0a84ff]">{percentage}%</span>
+              </div>
+            )}
           </div>
 
           {remainingMl > 0 ? (
