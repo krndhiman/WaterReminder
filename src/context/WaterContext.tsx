@@ -35,7 +35,11 @@ import {
   DEFAULT_PRESETS,
 } from '../utils/storage';
 import { soundEffects } from '../utils/soundEffects';
-import { sendBrowserNotification } from '../utils/notifications';
+import {
+  sendBrowserNotification,
+  scheduleBackgroundNotification,
+  getNotificationPermission,
+} from '../utils/notifications';
 import {
   fetchWeatherByCoords,
   searchCities,
@@ -629,9 +633,10 @@ export const WaterProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const persona = COACH_PERSONAS[schedule.coachPersona] || COACH_PERSONAS.biohacker;
     const randomQuote = persona.quotes[Math.floor(Math.random() * persona.quotes.length)];
 
-    if (schedule.browserNotifications) {
+    if (getNotificationPermission() === 'granted' || schedule.browserNotifications) {
       sendBrowserNotification(`💧 ${persona.name} (${persona.emoji}): Hydration Check!`, {
         body: randomQuote,
+        requireInteraction: true,
       });
     }
   }, [openReminderModal, schedule.coachPersona, schedule.browserNotifications]);
@@ -723,7 +728,8 @@ export const WaterProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             const persona = COACH_PERSONAS[schedule.coachPersona] || COACH_PERSONAS.biohacker;
             const quote = persona.quotes[Math.floor(Math.random() * persona.quotes.length)];
 
-            if (schedule.browserNotifications) {
+            // Send real OS / lock-screen notification whenever permission is granted
+            if (getNotificationPermission() === 'granted' || schedule.browserNotifications) {
               sendBrowserNotification(`💧 ${persona.name} (${persona.emoji}): Hydration Time!`, {
                 body: quote,
                 requireInteraction: true,
@@ -739,6 +745,15 @@ export const WaterProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           nextReminderTime: nextTime,
           snoozeUntil: null,
         }));
+
+        // Schedule background Service Worker reminder for background tabs/locked screens
+        const persona = COACH_PERSONAS[schedule.coachPersona] || COACH_PERSONAS.biohacker;
+        const nextQuote = persona.quotes[Math.floor(Math.random() * persona.quotes.length)];
+        scheduleBackgroundNotification(
+          schedule.intervalMinutes * 60 * 1000,
+          `💧 ${persona.name} (${persona.emoji}): Hydration Time!`,
+          nextQuote
+        );
       }
     }, 1000);
 

@@ -1,5 +1,5 @@
-// Service Worker for AquaFlow Background Notifications & PWA
-const CACHE_NAME = 'aquaflow-v1';
+// Enhanced Service Worker for AquaFlow Background Notifications & PWA
+const CACHE_NAME = 'aquaflow-v2';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -9,6 +9,11 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
 
+let backgroundTimerId = null;
+let scheduledTime = null;
+let scheduledTitle = '💧 Time to Hydrate! - AquaFlow';
+let scheduledBody = 'Keep your streak alive and stay energized with a fresh glass of water!';
+
 // Handle incoming background push or scheduled notification triggers
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
@@ -17,7 +22,7 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Focus existing window or open new
+      // Send action to open client
       for (const client of clientList) {
         if (client.url && 'focus' in client) {
           if (action) {
@@ -26,23 +31,74 @@ self.addEventListener('notificationclick', (event) => {
           return client.focus();
         }
       }
+      // If no window is open, open a new one with deep link action
+      const targetUrl = action ? `/?action=${action}` : '/';
       if (self.clients.openWindow) {
-        return self.clients.openWindow('/');
+        return self.clients.openWindow(targetUrl);
       }
     })
   );
 });
 
-// Handle messages from the app to schedule or show notifications via service worker
+// Handle messages from the app
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+  if (!event.data) return;
+
+  // 1. Direct notification show request
+  if (event.data.type === 'SHOW_NOTIFICATION') {
     const { title, options } = event.data;
-    self.registration.showNotification(title, {
+    self.registration.showNotification(title || '💧 AquaFlow Hydration Check', {
       icon: '/favicon.svg',
       badge: '/favicon.svg',
       vibrate: [200, 100, 200, 100, 400],
       requireInteraction: true,
+      tag: 'aquaflow-reminder',
+      renotify: true,
+      actions: [
+        { action: 'log_250', title: '🥛 +250ml' },
+        { action: 'log_500', title: '🥤 +500ml' },
+        { action: 'snooze_15', title: '⏳ Snooze 15m' },
+      ],
       ...options,
     });
+  }
+
+  // 2. Schedule a future background notification
+  if (event.data.type === 'SCHEDULE_REMINDER') {
+    const { delayMs, title, body } = event.data;
+    if (backgroundTimerId) {
+      clearTimeout(backgroundTimerId);
+    }
+
+    if (delayMs > 0) {
+      scheduledTime = Date.now() + delayMs;
+      scheduledTitle = title || '💧 Time to Hydrate!';
+      scheduledBody = body || 'Stay hydrated and keep your momentum going!';
+
+      backgroundTimerId = setTimeout(() => {
+        self.registration.showNotification(scheduledTitle, {
+          icon: '/favicon.svg',
+          badge: '/favicon.svg',
+          body: scheduledBody,
+          vibrate: [200, 100, 200, 100, 400],
+          requireInteraction: true,
+          tag: 'aquaflow-reminder',
+          renotify: true,
+          actions: [
+            { action: 'log_250', title: '🥛 +250ml' },
+            { action: 'log_500', title: '🥤 +500ml' },
+            { action: 'snooze_15', title: '⏳ Snooze 15m' },
+          ],
+        });
+      }, delayMs);
+    }
+  }
+
+  // 3. Cancel scheduled reminder
+  if (event.data.type === 'CANCEL_REMINDER') {
+    if (backgroundTimerId) {
+      clearTimeout(backgroundTimerId);
+      backgroundTimerId = null;
+    }
   }
 });

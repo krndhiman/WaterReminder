@@ -18,6 +18,7 @@ import { useWater, WaterProvider } from './context/WaterContext';
 import { LiquidBottle } from './components/LiquidBottle';
 import { QuickAddBar } from './components/QuickAddBar';
 import { ReminderBanner } from './components/ReminderBanner';
+import { NotificationBanner } from './components/NotificationBanner';
 import { HistoryAnalytics } from './components/HistoryAnalytics';
 import { SettingsTab } from './components/SettingsTab';
 import { CustomAmountModal } from './components/CustomAmountModal';
@@ -148,6 +149,9 @@ const MainLayout: React.FC = () => {
           onOpenGoogleSync={() => setIsGoogleModalOpen(true)}
           onOpenAbout={() => setIsAboutModalOpen(true)}
         />
+
+        {/* System Notification Permission & Status Banner */}
+        <NotificationBanner />
 
         {/* ========================================================
             TAB 1: HYDRATE (The Core, Clean Daily Screen)
