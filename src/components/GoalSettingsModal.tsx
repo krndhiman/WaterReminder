@@ -259,48 +259,76 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ isOpen, on
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { id: 'sedentary', label: 'Sedentary (Desk)' },
-                    { id: 'moderate', label: 'Moderate (Active)' },
-                    { id: 'active', label: 'Active (Daily Gym)' },
-                    { id: 'athlete', label: 'Intense (Athlete)' },
+                    { id: 'sedentary', label: 'Sedentary (Desk)', add: '+0 ml' },
+                    { id: 'moderate', label: 'Moderate (Active)', add: '+500 ml' },
+                    { id: 'active', label: 'Active (Daily Gym)', add: '+1,000 ml' },
+                    { id: 'athlete', label: 'Intense (Athlete)', add: '+1,500 ml' },
                   ].map((act) => (
                     <button
                       key={act.id}
                       type="button"
                       onClick={() => setActivity(act.id as any)}
-                      className={`p-2.5 rounded-xl border text-left text-xs transition cursor-pointer ${
+                      className={`p-2.5 rounded-xl border text-left text-xs transition cursor-pointer flex flex-col justify-between ${
                         activity === act.id
                           ? 'bg-[#0a84ff]/15 border-[#0a84ff] text-white font-semibold'
                           : 'bg-black/30 border-white/[0.06] text-neutral-400 hover:text-white'
                       }`}
                     >
-                      {act.label}
+                      <span>{act.label}</span>
+                      <span className={`text-[10px] font-mono mt-0.5 ${activity === act.id ? 'text-[#0a84ff] font-bold' : 'text-neutral-500'}`}>
+                        {act.add}
+                      </span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Calculated Result Card */}
-              <div className="p-4 rounded-2xl apple-card flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[#0a84ff] block">
-                    Base Daily Recommendation
-                  </span>
-                  <span className="text-2xl font-bold text-white">
-                    {calculatedValue.toLocaleString()} ml
-                  </span>
-                  <span className="text-[11px] text-neutral-400 block">
-                    ({(calculatedValue / 1000).toFixed(1)} Liters / day • 35 ml/kg baseline)
-                  </span>
+              {/* Calculated Result Card with Step-by-Step Formula */}
+              <div className="p-4 rounded-2xl apple-card space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#0a84ff] block">
+                      Base Daily Recommendation
+                    </span>
+                    <span className="text-2xl font-bold text-white">
+                      {calculatedValue.toLocaleString()} ml
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleApplyGoal(calculatedValue)}
+                    className="px-4 py-2.5 rounded-xl apple-btn-primary text-xs font-semibold transition cursor-pointer shadow"
+                  >
+                    Apply Target
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleApplyGoal(calculatedValue)}
-                  className="px-4 py-2.5 rounded-xl apple-btn-primary text-xs font-semibold transition cursor-pointer shadow"
-                >
-                  Apply Target
-                </button>
+                {/* Mathematical Formula Breakdown */}
+                <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.06] text-[11px] text-neutral-300 font-mono space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-neutral-400">Body Weight ({weightKg} kg × 35 ml):</span>
+                    <span className="text-white font-semibold">{(weightKg * 35).toLocaleString()} ml</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-400">Activity ({activity}):</span>
+                    <span className="text-[#0a84ff] font-semibold">
+                      +{activity === 'sedentary' ? '0' : activity === 'moderate' ? '500' : activity === 'active' ? '1,000' : '1,500'} ml
+                    </span>
+                  </div>
+                  {!liveWeatherActive && (climate === 'tropical' || climate === 'hot_dry') && (
+                    <div className="flex justify-between">
+                      <span className="text-neutral-400">Climate ({climate}):</span>
+                      <span className="text-[#ff9f0a] font-semibold">
+                        +{climate === 'tropical' ? '350' : '600'} ml
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between pt-1 border-t border-white/[0.08] font-bold text-white">
+                    <span>Base Target:</span>
+                    <span>{calculatedValue.toLocaleString()} ml</span>
+                  </div>
+                </div>
               </div>
 
               {/* Live weather addition preview & safety guarantee */}
