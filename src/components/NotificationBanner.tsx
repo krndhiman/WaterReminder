@@ -10,9 +10,13 @@ import {
 
 interface NotificationBannerProps {
   onOpenSchedule?: () => void;
+  onOpenLockScreenGuide?: () => void;
 }
 
-export const NotificationBanner: React.FC<NotificationBannerProps> = ({ onOpenSchedule }) => {
+export const NotificationBanner: React.FC<NotificationBannerProps> = ({
+  onOpenSchedule,
+  onOpenLockScreenGuide,
+}) => {
   const { schedule, updateSchedule, addWater } = useWater();
   const [permission, setPermission] = useState<string>(getNotificationPermission());
   const [justLogged300, setJustLogged300] = useState<boolean>(false);
@@ -61,16 +65,22 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({ onOpenSc
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between gap-2 p-3 rounded-2xl bg-[#161618] border border-white/[0.06] shadow-sm"
         >
-          {/* Status indicator */}
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-2 h-2 rounded-full bg-[#30d158] shadow-[0_0_6px_#30d158] shrink-0" />
+          {/* Status indicator — clickable to view Lock Screen background tips */}
+          <button
+            onClick={onOpenLockScreenGuide}
+            className="flex items-center gap-2.5 min-w-0 text-left cursor-pointer group"
+            title="Tap to see lock-screen & battery saver setup"
+          >
+            <div className="w-2 h-2 rounded-full bg-[#30d158] shadow-[0_0_6px_#30d158] shrink-0 group-hover:scale-125 transition" />
             <div className="min-w-0">
-              <span className="text-[11px] font-semibold text-white">Reminders Active</span>
+              <span className="text-[11px] font-semibold text-white group-hover:text-[#0a84ff] transition">
+                Reminders Active
+              </span>
               <span className="text-[10px] text-neutral-500 ml-1.5">
                 Every {schedule.intervalMinutes}m
               </span>
             </div>
-          </div>
+          </button>
 
           {/* Right: 300ml quick log + schedule icon */}
           <div className="flex items-center gap-1.5 shrink-0">

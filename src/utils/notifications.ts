@@ -148,11 +148,12 @@ export const sendBrowserNotification = async (
       const reg = swRegistration || (await navigator.serviceWorker.ready);
       if (reg && 'showNotification' in reg) {
         await reg.showNotification(title, {
-          icon: options?.icon || '/favicon.svg',
-          badge: '/favicon.svg',
+          icon: options?.icon || '/icon.jpg',
+          badge: '/icon.jpg',
           body: options?.body || 'Time to stay hydrated! Drink a fresh glass of water.',
           tag: options?.tag || 'aquaflow-reminder',
           renotify: true,
+          silent: false,
           requireInteraction: options?.requireInteraction ?? true,
           actions: options?.actions || [
             { action: 'log_300', title: '💧 +300ml Water' },
@@ -167,7 +168,7 @@ export const sendBrowserNotification = async (
 
     // 2. Fallback to standard desktop Notification constructor
     const notif = new Notification(title, {
-      icon: options?.icon || '/favicon.svg',
+      icon: options?.icon || '/icon.jpg',
       body: options?.body || 'Time to stay hydrated! Drink a fresh glass of water.',
       tag: options?.tag || 'aquaflow-reminder',
       requireInteraction: options?.requireInteraction ?? true,
@@ -196,7 +197,27 @@ export const sendBrowserNotification = async (
   }
 };
 
-// Schedule a background notification in Service Worker
+// Register Periodic Background Sync if supported (keeps notifications alive when app is closed)
+export const registerPeriodicSync = async () => {
+  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    if ('periodicSync' in reg) {
+      const status = await (navigator as any).permissions?.query({
+        name: 'periodic-background-sync',
+      });
+      if (status?.state === 'granted') {
+        await (reg as any).periodicSync.register('hydration-check', {
+          minInterval: 15 * 60 * 1000,
+        });
+      }
+    }
+  } catch (e) {
+    // Silently ignore if not supported
+  }
+};
+
+// Schedule a background notification in Service Worker (resilient to locked screen)
 export const scheduleBackgroundNotification = async (
   delayMs: number,
   title: string,
@@ -210,10 +231,13 @@ export const scheduleBackgroundNotification = async (
       reg.active.postMessage({
         type: 'SCHEDULE_REMINDER',
         delayMs,
+        targetTimestamp: Date.now() + delayMs,
         title,
         body,
       });
     }
+    // Also attempt periodic sync registration
+    registerPeriodicSync();
   } catch (e) {
     console.warn('Could not post SCHEDULE_REMINDER to service worker', e);
   }

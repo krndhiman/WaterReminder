@@ -17,9 +17,14 @@ import { requestNotificationPermission, getNotificationPermission, sendBrowserNo
 interface ScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenLockScreenGuide?: () => void;
 }
 
-export const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose }) => {
+export const ScheduleModal: React.FC<ScheduleModalProps> = ({
+  isOpen,
+  onClose,
+  onOpenLockScreenGuide,
+}) => {
   const { schedule, updateSchedule, triggerManualReminderTest } = useWater();
 
   const [interval, setInterval] = useState<number>(schedule.intervalMinutes || 45);
@@ -242,6 +247,17 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose })
                   <Check className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{successMessage}</span>
                 </div>
+              )}
+
+              {onOpenLockScreenGuide && (
+                <button
+                  type="button"
+                  onClick={onOpenLockScreenGuide}
+                  className="text-[11px] text-[#0a84ff] hover:underline flex items-center gap-1 font-medium pt-1 cursor-pointer"
+                >
+                  <Smartphone className="w-3.5 h-3.5" />
+                  <span>Phone not receiving alerts when locked? View setup guide</span>
+                </button>
               )}
             </div>
 

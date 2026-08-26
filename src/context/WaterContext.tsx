@@ -38,6 +38,7 @@ import { soundEffects } from '../utils/soundEffects';
 import {
   sendBrowserNotification,
   scheduleBackgroundNotification,
+  cancelBackgroundNotification,
   getNotificationPermission,
 } from '../utils/notifications';
 import {
@@ -778,6 +779,34 @@ export const WaterProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     return () => clearInterval(interval);
   }, [schedule, isReminderModalOpen, todayRecord.logs]);
+
+  // Keep Background Service Worker constantly synchronized with the next reminder target
+  useEffect(() => {
+    if (!schedule.enabled) {
+      cancelBackgroundNotification();
+      return;
+    }
+
+    const now = Date.now();
+    const target = schedule.snoozeUntil || schedule.focusModeUntil || schedule.nextReminderTime;
+    const remainingMs = target ? Math.max(1000, target - now) : schedule.intervalMinutes * 60 * 1000;
+
+    const persona = COACH_PERSONAS[schedule.coachPersona] || COACH_PERSONAS.biohacker;
+    const quote = persona.quotes[Math.floor(Math.random() * persona.quotes.length)];
+
+    scheduleBackgroundNotification(
+      remainingMs,
+      `💧 ${persona.name} (${persona.emoji}): Hydration Time!`,
+      quote
+    );
+  }, [
+    schedule.enabled,
+    schedule.nextReminderTime,
+    schedule.snoozeUntil,
+    schedule.focusModeUntil,
+    schedule.intervalMinutes,
+    schedule.coachPersona,
+  ]);
 
   // Hourly Pacer Calculations
   const paceInfo: HydrationPaceInfo = useMemo(() => {

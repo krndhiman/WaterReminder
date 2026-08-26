@@ -30,6 +30,7 @@ import { VoiceLoggerModal } from './components/VoiceLoggerModal';
 import { SquadsModal } from './components/SquadsModal';
 import { GoogleAuthModal } from './components/GoogleAuthModal';
 import { AboutAppModal } from './components/AboutAppModal';
+import { LockScreenGuideModal } from './components/LockScreenGuideModal';
 import { ReminderModal } from './components/ReminderModal';
 import { CelebrationModal } from './components/CelebrationModal';
 import { ContainerIcon } from './components/ContainerIcon';
@@ -70,6 +71,7 @@ const MainLayout: React.FC = () => {
   const [isSquadsModalOpen, setIsSquadsModalOpen] = useState(false);
   const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const [isLockScreenGuideOpen, setIsLockScreenGuideOpen] = useState(false);
 
   const todayStr = getTodayDateString();
 
@@ -152,7 +154,10 @@ const MainLayout: React.FC = () => {
         />
 
         {/* System Notification Permission & Status Banner */}
-        <NotificationBanner onOpenSchedule={() => setIsScheduleModalOpen(true)} />
+        <NotificationBanner
+          onOpenSchedule={() => setIsScheduleModalOpen(true)}
+          onOpenLockScreenGuide={() => setIsLockScreenGuideOpen(true)}
+        />
 
         {/* ========================================================
             TAB 1: HYDRATE (The Core, Clean Daily Screen)
@@ -436,6 +441,7 @@ const MainLayout: React.FC = () => {
       <ScheduleModal
         isOpen={isScheduleModalOpen}
         onClose={() => setIsScheduleModalOpen(false)}
+        onOpenLockScreenGuide={() => setIsLockScreenGuideOpen(true)}
       />
 
       <GoalSettingsModal
@@ -538,6 +544,12 @@ const MainLayout: React.FC = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Lock Screen & Battery Optimization Guide Modal */}
+      <LockScreenGuideModal
+        isOpen={isLockScreenGuideOpen}
+        onClose={() => setIsLockScreenGuideOpen(false)}
+      />
 
       {/* In-app Reminder Alert Modal */}
       <ReminderModal />

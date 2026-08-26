@@ -1,5 +1,5 @@
 // Enhanced Service Worker for AquaFlow Background Notifications & PWA
-const CACHE_NAME = 'aquaflow-v5';
+const CACHE_NAME = 'aquaflow-v6';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -13,6 +13,29 @@ let backgroundTimerId = null;
 let scheduledTime = null;
 let scheduledTitle = '💧 Time to Hydrate! - AquaFlow';
 let scheduledBody = 'Keep your streak alive and stay energized with a fresh glass of water!';
+
+// Fire the scheduled notification
+const fireScheduledNotification = async () => {
+  try {
+    await self.registration.showNotification(scheduledTitle, {
+      icon: '/icon.jpg',
+      badge: '/icon.jpg',
+      body: scheduledBody,
+      vibrate: [200, 100, 200, 100, 400],
+      requireInteraction: true,
+      tag: 'aquaflow-reminder',
+      renotify: true,
+      silent: false,
+      actions: [
+        { action: 'log_300', title: '💧 +300ml Water' },
+        { action: 'log_500', title: '🥤 +500ml Bottle' },
+        { action: 'snooze_15', title: '⏳ Snooze 15m' },
+      ],
+    });
+  } catch (err) {
+    console.error('Error firing background notification:', err);
+  }
+};
 
 // Handle incoming background push or scheduled notification triggers
 self.addEventListener('notificationclick', (event) => {
@@ -36,6 +59,62 @@ self.addEventListener('notificationclick', (event) => {
       if (self.clients.openWindow) {
         return self.clients.openWindow(targetUrl);
       }
+    })
+  );
+});
+
+// Periodic Background Sync handler (wakes up even when browser is closed)
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'hydration-check') {
+    event.waitUntil(
+      (async () => {
+        if (scheduledTime && Date.now() >= scheduledTime) {
+          await fireScheduledNotification();
+          scheduledTime = null;
+        }
+      })()
+    );
+  }
+});
+
+// Background Sync handler
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'hydration-sync') {
+    event.waitUntil(
+      (async () => {
+        if (scheduledTime && Date.now() >= scheduledTime) {
+          await fireScheduledNotification();
+          scheduledTime = null;
+        }
+      })()
+    );
+  }
+});
+
+// Web Push API handler
+self.addEventListener('push', (event) => {
+  let data = { title: '💧 Time to Hydrate!', body: 'Take a sip of water!' };
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch {
+      data.body = event.data.text();
+    }
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || '💧 AquaFlow Reminder', {
+      icon: '/icon.jpg',
+      badge: '/icon.jpg',
+      body: data.body,
+      vibrate: [200, 100, 200, 100, 400],
+      requireInteraction: true,
+      tag: 'aquaflow-reminder',
+      renotify: true,
+      actions: [
+        { action: 'log_300', title: '💧 +300ml Water' },
+        { action: 'log_500', title: '🥤 +500ml Bottle' },
+        { action: 'snooze_15', title: '⏳ Snooze 15m' },
+      ],
     })
   );
 });
@@ -65,31 +144,46 @@ self.addEventListener('message', (event) => {
 
   // 2. Schedule a future background notification
   if (event.data.type === 'SCHEDULE_REMINDER') {
-    const { delayMs, title, body } = event.data;
+    const { delayMs, title, body, targetTimestamp } = event.data;
     if (backgroundTimerId) {
       clearTimeout(backgroundTimerId);
+      backgroundTimerId = null;
     }
 
     if (delayMs > 0) {
-      scheduledTime = Date.now() + delayMs;
+      scheduledTime = targetTimestamp || Date.now() + delayMs;
       scheduledTitle = title || '💧 Time to Hydrate!';
       scheduledBody = body || 'Stay hydrated and keep your momentum going!';
 
+      // A. Schedule using Android Notification Triggers API (OS Alarm Manager) if supported
+      try {
+        const TriggerClass = (typeof TimestampTrigger !== 'undefined') ? TimestampTrigger : self.TimestampTrigger;
+        if (TriggerClass && ('showTrigger' in Notification.prototype || 'TimestampTrigger' in self)) {
+          self.registration.showNotification(scheduledTitle, {
+            icon: '/icon.jpg',
+            badge: '/icon.jpg',
+            body: scheduledBody,
+            showTrigger: new TriggerClass(scheduledTime),
+            vibrate: [200, 100, 200, 100, 400],
+            requireInteraction: true,
+            tag: 'aquaflow-alarm',
+            renotify: true,
+            actions: [
+              { action: 'log_300', title: '💧 +300ml Water' },
+              { action: 'log_500', title: '🥤 +500ml Bottle' },
+              { action: 'snooze_15', title: '⏳ Snooze 15m' },
+            ],
+          });
+        }
+      } catch (err) {
+        console.warn('Native TimestampTrigger not available or failed:', err);
+      }
+
+      // B. Fallback Timer for open/standby sessions
       backgroundTimerId = setTimeout(() => {
-        self.registration.showNotification(scheduledTitle, {
-          icon: '/icon.jpg',
-          badge: '/icon.jpg',
-          body: scheduledBody,
-          vibrate: [200, 100, 200, 100, 400],
-          requireInteraction: true,
-          tag: 'aquaflow-reminder',
-          renotify: true,
-          actions: [
-            { action: 'log_300', title: '💧 +300ml Water' },
-            { action: 'log_500', title: '🥤 +500ml Bottle' },
-            { action: 'snooze_15', title: '⏳ Snooze 15m' },
-          ],
-        });
+        fireScheduledNotification();
+        backgroundTimerId = null;
+        scheduledTime = null;
       }, delayMs);
     }
   }
@@ -100,5 +194,6 @@ self.addEventListener('message', (event) => {
       clearTimeout(backgroundTimerId);
       backgroundTimerId = null;
     }
+    scheduledTime = null;
   }
 });
