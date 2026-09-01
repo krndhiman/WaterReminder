@@ -6,6 +6,7 @@ import {
   requestNotificationPermission,
   getNotificationPermission,
   sendBrowserNotification,
+  subscribeToPush,
 } from '../utils/notifications';
 
 interface NotificationBannerProps {
@@ -25,8 +26,12 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({
   useEffect(() => {
     const perm = getNotificationPermission();
     setPermission(perm);
-    if (perm === 'granted' && !schedule.browserNotifications) {
-      updateSchedule({ browserNotifications: true });
+    if (perm === 'granted') {
+      if (!schedule.browserNotifications) {
+        updateSchedule({ browserNotifications: true });
+      }
+      // Re-register Web Push subscription on every app load (in case it was cleared)
+      subscribeToPush().catch(() => {});
     }
   }, []);
 
@@ -37,7 +42,9 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({
 
     if (result.granted) {
       updateSchedule({ browserNotifications: true });
-      // Send a real confirmation notification — this is the legitimate system notification
+      // Subscribe to Web Push (enables FCM lock-screen delivery)
+      await subscribeToPush();
+      // Send a confirmation notification
       await sendBrowserNotification('💧 AquaFlow Reminders Active!', {
         body: `You'll get water reminders every ${schedule.intervalMinutes} minutes. Stay hydrated!`,
         requireInteraction: true,
