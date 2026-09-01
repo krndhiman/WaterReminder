@@ -30,8 +30,13 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({
       if (!schedule.browserNotifications) {
         updateSchedule({ browserNotifications: true });
       }
-      // Re-register Web Push subscription on every app load (in case it was cleared)
-      subscribeToPush().catch(() => {});
+      // Re-register Web Push subscription with current schedule on every app load
+      subscribeToPush({
+        intervalMinutes: schedule.intervalMinutes,
+        wakeTime: schedule.wakeTime,
+        sleepTime: schedule.sleepTime,
+        nextReminderAt: schedule.nextReminderTime ?? undefined,
+      }).catch(() => {});
     }
   }, []);
 
@@ -42,8 +47,13 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({
 
     if (result.granted) {
       updateSchedule({ browserNotifications: true });
-      // Subscribe to Web Push (enables FCM lock-screen delivery)
-      await subscribeToPush();
+      // Subscribe to Web Push with schedule — saved in Redis for server-side cron delivery
+      await subscribeToPush({
+        intervalMinutes: schedule.intervalMinutes,
+        wakeTime: schedule.wakeTime,
+        sleepTime: schedule.sleepTime,
+        nextReminderAt: Date.now() + schedule.intervalMinutes * 60 * 1000,
+      });
       // Send a confirmation notification
       await sendBrowserNotification('💧 AquaFlow Reminders Active!', {
         body: `You'll get water reminders every ${schedule.intervalMinutes} minutes. Stay hydrated!`,

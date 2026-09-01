@@ -1,10 +1,14 @@
-// Vercel Serverless Function: /api/subscribe.js
-// Stores a browser push subscription for Web Push delivery
-// 
-// This uses an in-memory store for simplicity (restarts on cold start).
-// For production persistence, replace with a KV store (Vercel KV / Upstash Redis).
+// /api/subscribe.js
+// Saves a user's push subscription + reminder schedule to Upstash Redis
+// This persists across all serverless function cold starts
 
+import { Redis } from '@upstash/redis';
 import webpush from 'web-push';
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
@@ -14,49 +18,67 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 }
 
-// Simple in-memory store — persists for the lifetime of this serverless function instance
-// Replace with Vercel KV / Upstash for true persistence across cold starts
-const subscriptions = new Map();
-
 export default async function handler(req, res) {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  // POST /api/subscribe — Save or update a push subscription
+  // POST — save/update a subscription with schedule info
   if (req.method === 'POST') {
-    const { subscription, userId } = req.body || {};
+    const {
+      subscription,
+      userId,
+      intervalMinutes = 45,
+      wakeTime = '07:00',
+      sleepTime = '22:30',
+      nextReminderAt, // unix ms timestamp
+    } = req.body || {};
 
-    if (!subscription || !subscription.endpoint) {
-      return res.status(400).json({ error: 'Missing subscription endpoint' });
+    if (!subscription?.endpoint) {
+      return res.status(400).json({ error: 'Missing subscription' });
     }
 
-    const key = userId || subscription.endpoint;
-    subscriptions.set(key, { subscription, userId, savedAt: Date.now() });
+    // Create a stable user ID from the endpoint if none provided
+    const uid = userId || Buffer.from(subscription.endpoint).toString('base64').slice(-20);
 
-    console.log(`[AquaFlow Push] Subscription saved for ${key}`);
-    return res.status(201).json({ success: true, message: 'Push subscription saved.' });
+    const record = {
+      subscription,
+      uid,
+      intervalMinutes,
+      wakeTime,
+      sleepTime,
+      nextReminderAt: nextReminderAt || Date.now() + intervalMinutes * 60 * 1000,
+      updatedAt: Date.now(),
+      active: true,
+    };
+
+    // Store the record and keep the uid in a global set
+    await redis.set(`sub:${uid}`, JSON.stringify(record));
+    await redis.sadd('aquaflow:users', uid);
+
+    console.log(`[AquaFlow] Subscription saved: ${uid}, next reminder in ${intervalMinutes}m`);
+    return res.status(201).json({ success: true, uid });
   }
 
-  // DELETE /api/subscribe — Remove a push subscription
+  // DELETE — remove subscription
   if (req.method === 'DELETE') {
-    const { userId, endpoint } = req.body || {};
-    const key = userId || endpoint;
-    if (key) subscriptions.delete(key);
+    const { userId } = req.body || {};
+    if (userId) {
+      await redis.del(`sub:${userId}`);
+      await redis.srem('aquaflow:users', userId);
+    }
     return res.status(200).json({ success: true });
   }
 
-  // GET /api/subscribe — Health check / subscription count
+  // GET — health check
   if (req.method === 'GET') {
+    const count = await redis.scard('aquaflow:users');
     return res.status(200).json({
       status: 'ok',
-      subscriptionCount: subscriptions.size,
+      activeUsers: count,
       vapidConfigured: !!(VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY),
+      redisConnected: true,
     });
   }
 

@@ -1,11 +1,14 @@
-// Vercel Serverless Function: /api/send-push.js
-// Called by the browser (via sendScheduledPush) to enqueue a real Web Push message.
-// The push goes through Google FCM → Android OS → Service Worker → Lock Screen.
-//
-// This stores scheduled pushes in memory and immediately dispatches them via web-push.
-// For production: use Vercel Cron Jobs to check schedules on the server side.
+// /api/send-push.js
+// Called directly by the browser to immediately send a push (for quick actions like snooze)
+// Also updates the schedule in Redis so the cron picks up the new nextReminderAt
 
+import { Redis } from '@upstash/redis';
 import webpush from 'web-push';
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
@@ -19,26 +22,37 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') return res.status(200).end();
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-    return res.status(500).json({ error: 'VAPID keys not configured on server.' });
+    return res.status(500).json({ error: 'VAPID keys not configured' });
   }
 
-  const { subscription, title, body, data } = req.body || {};
+  const { subscription, title, body, uid, nextReminderAt } = req.body || {};
 
-  if (!subscription || !subscription.endpoint) {
+  if (!subscription?.endpoint) {
     return res.status(400).json({ error: 'Missing subscription' });
+  }
+
+  // If uid + nextReminderAt provided, update the schedule in Redis
+  // so cron knows the new next reminder time
+  if (uid && nextReminderAt) {
+    try {
+      const raw = await redis.get(`sub:${uid}`);
+      if (raw) {
+        const record = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        await redis.set(`sub:${uid}`, JSON.stringify({ ...record, nextReminderAt }));
+      }
+    } catch (e) {
+      // Non-fatal — schedule update failed but we still send the push
+      console.warn('[AquaFlow] Failed to update schedule in Redis:', e.message);
+    }
   }
 
   const payload = JSON.stringify({
     title: title || '💧 Hydration Reminder',
-    body: body || 'Time to drink water! Stay hydrated.',
+    body: body || 'Time to drink water! Stay healthy and hydrated.',
     icon: '/icon.jpg',
     badge: '/icon.jpg',
     tag: 'aquaflow-reminder',
@@ -50,24 +64,20 @@ export default async function handler(req, res) {
       { action: 'log_500', title: '🥤 +500ml Bottle' },
       { action: 'snooze_15', title: '⏳ Snooze 15m' },
     ],
-    data: data || {},
   });
 
   try {
     await webpush.sendNotification(subscription, payload);
-    console.log(`[AquaFlow Push] Notification sent to ${subscription.endpoint.slice(0, 60)}...`);
     return res.status(200).json({ success: true });
   } catch (err) {
-    console.error('[AquaFlow Push] Send failed:', err.statusCode, err.body);
-
-    // 410 Gone = subscription is no longer valid
     if (err.statusCode === 410 || err.statusCode === 404) {
-      return res.status(410).json({ error: 'Subscription expired. Please re-subscribe.' });
+      // Remove expired subscription
+      if (uid) {
+        await redis.del(`sub:${uid}`).catch(() => {});
+        await redis.srem('aquaflow:users', uid).catch(() => {});
+      }
+      return res.status(410).json({ error: 'Subscription expired' });
     }
-
-    return res.status(500).json({
-      error: 'Failed to send push notification',
-      detail: err.message,
-    });
+    return res.status(500).json({ error: err.message });
   }
 }

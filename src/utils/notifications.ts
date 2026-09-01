@@ -99,7 +99,13 @@ export const getNotificationPermission = (): NotificationPermission | 'unsupport
 // Subscribe to Web Push via browser Push API + register with our server
 // This is the KEY function that enables lock-screen delivery via FCM
 // ─────────────────────────────────────────────────────────────────────────────
-export const subscribeToPush = async (userId?: string): Promise<PushSubscription | null> => {
+export const subscribeToPush = async (opts?: {
+  userId?: string;
+  intervalMinutes?: number;
+  wakeTime?: string;
+  sleepTime?: string;
+  nextReminderAt?: number;
+}): Promise<PushSubscription | null> => {
   if (typeof window === 'undefined' || !('PushManager' in window)) {
     console.warn('[AquaFlow] Push API not supported in this browser.');
     return null;
@@ -127,28 +133,36 @@ export const subscribeToPush = async (userId?: string): Promise<PushSubscription
 
     pushSubscription = sub;
 
-    // Register subscription with the Vercel backend
+    // Register subscription + schedule with the Vercel backend (saved in Redis)
     try {
+      const storedUid = opts?.userId || (() => { try { return localStorage.getItem('aquaflow_push_uid') || undefined; } catch { return undefined; } })();
       const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           subscription: sub.toJSON(),
-          userId: userId || 'anonymous',
+          userId: storedUid,
+          intervalMinutes: opts?.intervalMinutes ?? 45,
+          wakeTime: opts?.wakeTime ?? '07:00',
+          sleepTime: opts?.sleepTime ?? '22:30',
+          nextReminderAt: opts?.nextReminderAt ?? (Date.now() + (opts?.intervalMinutes ?? 45) * 60 * 1000),
         }),
       });
+
       if (response.ok) {
-        console.log('[AquaFlow] Push subscription registered with server ✓');
+        const data = await response.json();
+        if (data.uid) {
+          try { localStorage.setItem('aquaflow_push_uid', data.uid); } catch {}
+        }
+        console.log('[AquaFlow] Push subscription + schedule saved to server ✓');
       } else {
-        console.warn('[AquaFlow] Failed to register subscription with server:', await response.text());
+        console.warn('[AquaFlow] Failed to register subscription:', await response.text());
       }
     } catch (serverErr) {
       console.warn('[AquaFlow] Could not reach subscription server:', serverErr);
     }
 
-    // Also register Periodic Background Sync as a bonus
     registerPeriodicSync(reg);
-
     return sub;
   } catch (err) {
     console.error('[AquaFlow] Push subscription failed:', err);
