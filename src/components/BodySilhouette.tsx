@@ -1,40 +1,15 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Droplet,
   Check,
-  Sparkles,
-  Info,
-  Sliders,
-  X,
-  Zap,
   Activity,
-  Heart,
-  ChevronRight,
+  Zap,
+  X,
   ShieldCheck,
   Flame,
 } from 'lucide-react';
 import { useWater } from '../context/WaterContext';
-import { AvatarSilhouetteType, ProgressDisplayMode } from '../types/water';
-
-// SVG anatomical body paths normalized to 0 0 240 400
-export const SILHOUETTE_PATHS: Record<AvatarSilhouetteType, string> = {
-  // Balanced / Athletic Minimalist Silhouette
-  neutral:
-    'M 120 12 C 134 12, 144 22, 144 36 C 144 49, 135 59, 127 62 C 127 66, 128 70, 131 73 C 145 75, 163 81, 172 92 C 178 100, 179 114, 177 130 C 175 146, 172 164, 170 184 C 168 198, 164 211, 159 215 C 156 218, 152 215, 151 208 C 153 192, 155 172, 156 154 C 157 140, 156 130, 152 128 C 148 126, 147 134, 146 146 C 145 161, 146 180, 147 195 C 148 205, 147 216, 145 226 C 144 236, 142 252, 141 268 C 140 284, 139 300, 139 316 C 139 332, 139 350, 138 366 C 137 376, 135 384, 131 388 C 127 390, 123 388, 122 382 C 122 374, 123 363, 124 348 C 125 332, 126 314, 126 296 C 126 278, 125 260, 124 243 C 123 230, 121 221, 120 218 C 119 221, 117 230, 116 243 C 115 260, 114 278, 114 296 C 114 314, 115 332, 116 348 C 117 363, 118 374, 118 382 C 117 388, 113 390, 109 388 C 105 384, 103 376, 102 366 C 101 350, 101 332, 101 316 C 101 300, 100 284, 99 268 C 98 252, 96 236, 95 226 C 93 216, 92 205, 93 195 C 94 180, 95 161, 94 146 C 93 134, 92 126, 88 128 C 84 130, 83 140, 84 154 C 85 172, 87 192, 89 208 C 88 215, 84 218, 81 215 C 76 211, 72 198, 70 184 C 68 164, 65 146, 63 130 C 61 114, 62 100, 68 92 C 77 81, 95 75, 109 73 C 112 70, 113 66, 113 62 C 105 59, 96 49, 96 36 C 96 22, 106 12, 120 12 Z',
-
-  // Male Silhouette: Broad muscular shoulders, tapered torso
-  male:
-    'M 120 10 C 135 10, 146 20, 146 35 C 146 48, 137 58, 129 61 C 129 65, 131 69, 134 72 C 152 74, 172 80, 182 91 C 188 98, 187 114, 184 130 C 181 146, 177 165, 175 186 C 173 200, 168 213, 163 217 C 159 220, 155 216, 154 208 C 157 190, 160 170, 160 152 C 160 138, 159 128, 154 126 C 149 124, 147 132, 146 145 C 144 160, 145 178, 146 193 C 147 203, 146 214, 144 224 C 143 234, 141 251, 140 268 C 139 285, 138 302, 138 319 C 138 335, 138 353, 137 368 C 136 378, 134 386, 130 389 C 126 391, 122 388, 121 381 C 121 372, 122 360, 123 346 C 124 330, 125 312, 125 294 C 125 276, 124 258, 123 241 C 122 228, 121 219, 120 216 C 119 219, 118 228, 117 241 C 116 258, 115 276, 115 294 C 115 312, 116 330, 117 346 C 118 360, 119 372, 119 381 C 118 388, 114 391, 110 389 C 106 386, 104 378, 103 368 C 102 353, 102 335, 102 319 C 102 302, 101 285, 100 268 C 99 251, 97 234, 96 224 C 94 214, 93 203, 94 193 C 95 178, 96 160, 94 145 C 93 132, 91 124, 86 126 C 81 128, 80 138, 80 152 C 80 170, 83 190, 86 208 C 85 216, 81 220, 77 217 C 72 213, 67 200, 65 186 C 63 165, 59 146, 56 130 C 53 114, 52 98, 58 91 C 68 80, 88 74, 106 72 C 109 69, 111 65, 111 61 C 103 58, 94 48, 94 35 C 94 20, 105 10, 120 10 Z',
-
-  // Female Silhouette: Hourglass curves, graceful waist
-  female:
-    'M 120 14 C 133 14, 142 23, 142 36 C 142 48, 134 57, 126 60 C 126 64, 127 68, 130 71 C 141 73, 156 79, 165 89 C 171 97, 171 110, 169 126 C 167 142, 164 160, 163 180 C 161 194, 157 207, 153 211 C 150 214, 146 211, 145 204 C 147 189, 150 169, 150 152 C 151 138, 149 129, 145 127 C 142 125, 140 133, 140 146 C 139 160, 141 176, 144 191 C 147 204, 148 218, 146 230 C 144 242, 142 258, 140 274 C 139 290, 138 305, 138 321 C 138 337, 137 353, 136 368 C 135 377, 133 384, 129 387 C 126 389, 122 387, 121 380 C 121 372, 122 361, 123 347 C 124 332, 125 315, 125 297 C 125 280, 124 262, 123 245 C 122 232, 121 223, 120 220 C 119 223, 118 232, 117 245 C 116 262, 115 280, 115 297 C 115 315, 116 332, 117 347 C 118 361, 119 372, 119 380 C 118 387, 114 389, 111 387 C 107 384, 105 377, 104 368 C 103 353, 102 337, 102 321 C 102 305, 101 290, 100 274 C 98 258, 96 242, 94 230 C 92 218, 93 204, 96 191 C 99 176, 101 160, 100 146 C 100 133, 98 125, 95 127 C 91 129, 89 138, 90 152 C 90 169, 93 189, 95 204 C 94 211, 90 214, 87 211 C 83 207, 79 194, 77 180 C 76 160, 73 142, 71 126 C 69 110, 69 97, 75 89 C 84 79, 99 73, 110 71 C 113 68, 114 64, 114 60 C 106 57, 98 48, 98 36 C 98 23, 107 14, 120 14 Z',
-
-  // Cute / Chibi Avatar: Friendly rounded character silhouette
-  cute:
-    'M 120 12 C 142 12, 154 26, 154 46 C 154 62, 142 74, 134 78 C 146 82, 164 90, 168 104 C 172 116, 172 136, 170 156 C 168 174, 164 192, 160 196 C 156 200, 150 196, 148 188 C 150 172, 152 152, 152 136 C 152 122, 150 114, 144 112 C 138 110, 136 120, 136 136 C 136 156, 138 180, 140 202 C 142 222, 142 244, 140 264 C 138 284, 136 308, 135 330 C 134 350, 133 370, 130 382 C 127 388, 122 388, 120 380 C 119 368, 120 348, 121 324 C 122 298, 122 270, 121 242 C 120 228, 120 220, 120 216 C 120 220, 120 228, 119 242 C 118 270, 118 298, 119 324 C 120 348, 121 368, 120 380 C 118 388, 113 388, 110 382 C 107 370, 106 350, 105 330 C 104 308, 102 284, 100 264 C 98 244, 98 222, 100 202 C 102 180, 104 156, 104 136 C 104 120, 102 110, 96 112 C 90 114, 88 122, 88 136 C 88 152, 90 172, 92 188 C 90 196, 84 200, 80 196 C 76 192, 72 174, 70 156 C 68 136, 68 116, 72 104 C 76 90, 94 82, 106 78 C 98 74, 86 62, 86 46 C 86 26, 98 12, 120 12 Z',
-};
+import { ProgressDisplayMode } from '../types/water';
 
 // 6 Major Biological Organ Milestones
 export interface OrganMilestone {
@@ -42,9 +17,9 @@ export interface OrganMilestone {
   name: string;
   shortName: string;
   emoji: string;
-  x: number; // percentage in SVG coordinate space (0-100)
-  y: number; // percentage in SVG coordinate space (0-100)
-  thresholdPercent: number; // % hydration required to reach/activate this organ
+  x: number; // percentage in coordinate space (0-100)
+  y: number; // percentage in coordinate space (0-100)
+  thresholdPercent: number; // % hydration required to activate
   title: string;
   scienceNote: string;
   benefit: string;
@@ -58,7 +33,7 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     shortName: 'Brain',
     emoji: '🧠',
     x: 50,
-    y: 9.5,
+    y: 10,
     thresholdPercent: 90,
     title: 'Cognitive Optimization & Alertness',
     scienceNote:
@@ -85,8 +60,8 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     name: 'Heart & Blood Plasma',
     shortName: 'Heart',
     emoji: '🫀',
-    x: 50,
-    y: 35,
+    x: 47,
+    y: 34,
     thresholdPercent: 60,
     title: 'Blood Plasma Volume & Stroke Power',
     scienceNote:
@@ -149,13 +124,9 @@ interface Bubble {
 
 interface BodySilhouetteProps {
   onQuickAdd?: () => void;
-  onToggleViewMode?: () => void;
 }
 
-export const BodySilhouette: React.FC<BodySilhouetteProps> = ({
-  onQuickAdd,
-  onToggleViewMode,
-}) => {
+export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) => {
   const { selectedRecord, chugWarning, clearChugWarning, profile, weather, updateProfile } =
     useWater();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -165,28 +136,30 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({
   const percentage = Math.min(100, Math.max(0, Math.round((netTotal / selectedRecord.goal) * 100)));
   const remainingMl = Math.max(0, selectedRecord.goal - netTotal);
 
-  const avatarType: AvatarSilhouetteType = profile.avatarType || 'neutral';
+  // Active visual mode: 'male' | 'female' (cylinder is handled in App.tsx)
+  const currentMode: 'male' | 'female' =
+    profile.progressDisplayMode === 'female' ? 'female' : 'male';
+
   const [selectedOrgan, setSelectedOrgan] = useState<OrganMilestone | null>(null);
-  const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
 
   // Wave physics
-  const waveAmplitudeRef = useRef<number>(4);
+  const waveAmplitudeRef = useRef<number>(3.5);
   const phaseRef = useRef<number>(0);
   const bubblesRef = useRef<Bubble[]>([]);
   const animationFrameRef = useRef<number | null>(null);
 
   const handleBodyTap = () => {
-    waveAmplitudeRef.current = 14;
+    waveAmplitudeRef.current = 12;
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {
-        navigator.vibrate(20);
+        navigator.vibrate(18);
       } catch {
         // ignore
       }
     }
   };
 
-  // Fluid canvas animation loop
+  // Fluid canvas wave animation loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -194,7 +167,7 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({
     if (!ctx) return;
 
     if (bubblesRef.current.length === 0) {
-      for (let i = 0; i < 18; i++) {
+      for (let i = 0; i < 20; i++) {
         bubblesRef.current.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
@@ -223,13 +196,13 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({
       const baseWaterY = height - currentWaterHeight;
 
       if (percentage > 0) {
-        // 1. Back Wave (Deep Ocean Blue)
+        // 1. Back Wave (Deep Subdued Ocean Blue)
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(0, height);
         for (let x = 0; x <= width; x += 4) {
           const wave1 =
-            Math.sin(x * 0.018 + phaseRef.current + Math.PI) * (waveAmplitudeRef.current * 0.65);
+            Math.sin(x * 0.02 + phaseRef.current + Math.PI) * (waveAmplitudeRef.current * 0.65);
           const y = baseWaterY + wave1;
           ctx.lineTo(x, y);
         }
@@ -248,7 +221,7 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({
         ctx.beginPath();
         ctx.moveTo(0, height);
         for (let x = 0; x <= width; x += 4) {
-          const wave2 = Math.sin(x * 0.022 + phaseRef.current) * waveAmplitudeRef.current;
+          const wave2 = Math.sin(x * 0.024 + phaseRef.current) * waveAmplitudeRef.current;
           const y = baseWaterY + wave2;
           ctx.lineTo(x, y);
         }
@@ -266,12 +239,12 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({
         // 3. Meniscus Highlight Line
         ctx.beginPath();
         for (let x = 0; x <= width; x += 4) {
-          const wave2 = Math.sin(x * 0.022 + phaseRef.current) * waveAmplitudeRef.current;
+          const wave2 = Math.sin(x * 0.024 + phaseRef.current) * waveAmplitudeRef.current;
           const y = baseWaterY + wave2;
           if (x === 0) ctx.moveTo(x, y);
           else ctx.lineTo(x, y);
         }
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
         ctx.lineWidth = 2;
         ctx.stroke();
         ctx.restore();
@@ -309,9 +282,6 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({
     };
   }, [percentage]);
 
-  const activeSilhouettePath = SILHOUETTE_PATHS[avatarType] || SILHOUETTE_PATHS.neutral;
-
-  // Find currently active / hydrated organs
   const hydratedOrgansCount = useMemo(() => {
     return ORGAN_MILESTONES.filter((o) => percentage >= o.thresholdPercent).length;
   }, [percentage]);
@@ -339,7 +309,7 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({
       <motion.div
         whileTap={{ scale: 0.99 }}
         onClick={handleBodyTap}
-        className="relative w-full max-w-[320px] h-[410px] rounded-[44px] p-4 cursor-pointer apple-card overflow-hidden flex flex-col items-center justify-between shadow-2xl border border-white/[0.08]"
+        className="relative w-full max-w-[320px] h-[430px] rounded-[44px] p-4 cursor-pointer apple-card overflow-hidden flex flex-col items-center justify-between shadow-2xl border border-white/[0.08]"
       >
         {/* Background Ambient Radial Glow */}
         <div
@@ -352,21 +322,51 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({
           }}
         />
 
-        {/* Top Floating Control Bar */}
-        <div className="w-full z-20 flex items-center justify-between pt-1 px-1">
-          {/* Avatar Switcher Button */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsAvatarPickerOpen(true);
-            }}
-            className="px-2.5 py-1 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-[10px] font-semibold text-neutral-300 flex items-center gap-1.5 transition cursor-pointer backdrop-blur-md"
-            title="Choose body silhouette style"
-          >
-            <span className="capitalize">{avatarType}</span>
-            <Sliders className="w-3 h-3 text-[#0a84ff]" />
-          </button>
+        {/* Top 3-Mode Segmented Control: [ 👨 Male ] [ 👩 Female ] [ 🍶 Cylinder ] */}
+        <div className="w-full z-20 flex items-center justify-between gap-1.5 pt-1 px-1">
+          <div className="flex items-center gap-1 bg-black/50 p-1 rounded-2xl border border-white/[0.08] backdrop-blur-md">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                updateProfile({ progressDisplayMode: 'male', avatarType: 'male' });
+              }}
+              className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 ${
+                currentMode === 'male'
+                  ? 'bg-[#0a84ff] text-white shadow-sm'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <span>👨 Male</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                updateProfile({ progressDisplayMode: 'female', avatarType: 'female' });
+              }}
+              className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 ${
+                currentMode === 'female'
+                  ? 'bg-[#0a84ff] text-white shadow-sm'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <span>👩 Female</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                updateProfile({ progressDisplayMode: 'bottle' });
+              }}
+              className="px-2.5 py-1 rounded-xl text-[11px] font-semibold text-neutral-400 hover:text-white transition cursor-pointer flex items-center gap-1"
+              title="Switch to Cylinder Bottle view"
+            >
+              <span>🍶 Cylinder</span>
+            </button>
+          </div>
 
           {/* Biological Organ Status Badge */}
           <button
@@ -375,7 +375,7 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({
               e.stopPropagation();
               setSelectedOrgan(ORGAN_MILESTONES[0]);
             }}
-            className={`px-2.5 py-1 rounded-full border text-[10px] font-semibold flex items-center gap-1.5 transition cursor-pointer backdrop-blur-md ${
+            className={`px-2.5 py-1 rounded-full border text-[10px] font-semibold flex items-center gap-1 transition cursor-pointer backdrop-blur-md shrink-0 ${
               hydratedOrgansCount === ORGAN_MILESTONES.length
                 ? 'bg-[#30d158]/15 border-[#30d158]/30 text-[#30d158]'
                 : 'bg-[#0a84ff]/10 border-[#0a84ff]/25 text-[#0a84ff]'
@@ -383,14 +383,12 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({
             title="Tap to see biological organ hydration breakdown"
           >
             <Activity className="w-3 h-3" />
-            <span>
-              {hydratedOrgansCount}/{ORGAN_MILESTONES.length} Organs Hydrated
-            </span>
+            <span>{hydratedOrgansCount}/6</span>
           </button>
         </div>
 
         {/* Volume Scale Markers (pinned to right edge) */}
-        <div className="absolute right-4 top-16 bottom-20 flex flex-col justify-between items-end text-[10px] font-mono text-neutral-500 z-20 pointer-events-none select-none">
+        <div className="absolute right-3.5 top-18 bottom-22 flex flex-col justify-between items-end text-[10px] font-mono text-neutral-500 z-20 pointer-events-none select-none">
           <div className="flex items-center gap-1">
             <span className={percentage >= 100 ? 'text-[#30d158] font-bold' : ''}>
               {selectedRecord.goal}ml
@@ -422,35 +420,63 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({
         </div>
 
         {/* ========================================================
-            THE SVG HUMAN BODY SILHOUETTE CANVAS
+            THE CLEAN ANATOMICAL HUMAN BODY SILHOUETTE CANVAS
         ======================================================== */}
-        <div className="relative w-[210px] h-[330px] flex items-center justify-center my-auto">
-          {/* SVG Definition with Unique Clip Path */}
+        <div className="relative w-[210px] h-[320px] flex items-center justify-center my-auto">
+          {/* SVG Definition with Clean Clip Path */}
           <svg
             className="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible"
-            viewBox="0 0 240 400"
+            viewBox="0 0 220 380"
           >
             <defs>
-              {/* Dynamic silhouette clip path */}
+              {/* Dynamic Silhouette Clip Path */}
               <clipPath id="body-silhouette-clip">
-                <path d={activeSilhouettePath} />
+                {currentMode === 'male' ? (
+                  <>
+                    {/* Male Head */}
+                    <ellipse cx="110" cy="36" rx="19" ry="23" />
+                    {/* Male Torso, Arms & Legs */}
+                    <path d="M 98,58 C 94,59 78,74 62,88 C 58,92 56,102 58,124 C 60,148 64,178 68,204 C 70,212 76,214 80,208 C 82,204 82,188 80,166 C 78,144 82,122 88,114 C 92,108 94,116 94,130 C 92,156 90,182 90,206 C 90,232 88,262 86,292 C 84,322 84,350 86,364 C 87,370 92,372 96,370 C 100,368 100,356 100,336 C 100,306 102,276 104,246 C 105,231 106,218 110,212 C 114,218 115,231 116,246 C 118,276 120,306 120,336 C 120,356 120,368 124,370 C 128,372 133,370 134,364 C 136,350 136,322 134,292 C 132,262 130,232 130,206 C 130,182 128,156 126,130 C 126,116 128,108 132,114 C 138,122 142,144 140,166 C 138,188 138,204 140,208 C 144,214 150,212 152,204 C 156,178 160,148 162,124 C 164,102 162,92 158,88 C 142,74 126,59 122,58 Z" />
+                  </>
+                ) : (
+                  <>
+                    {/* Female Head */}
+                    <ellipse cx="110" cy="38" rx="17" ry="21" />
+                    {/* Female Torso, Arms & Legs (Contoured hourglass curves) */}
+                    <path d="M 100,58 C 96,59 84,72 70,86 C 66,90 64,100 66,122 C 68,146 72,176 76,200 C 78,208 84,210 88,204 C 90,200 90,186 88,166 C 86,146 90,126 96,116 C 98,110 98,118 98,130 C 96,155 92,180 92,205 C 92,230 90,260 88,290 C 86,320 86,348 88,362 C 89,368 94,370 98,368 C 102,366 102,355 102,335 C 102,305 103,275 104,245 C 105,230 106,218 110,212 C 114,218 115,230 116,245 C 117,275 118,305 118,335 C 118,355 118,366 122,368 C 126,370 131,368 132,362 C 134,348 134,320 132,290 C 130,260 126,230 126,205 C 126,180 122,155 120,130 C 120,118 120,110 122,116 C 128,126 132,146 130,166 C 128,186 128,200 130,204 C 134,210 140,208 142,200 C 146,176 150,146 152,122 C 154,100 152,90 148,86 C 134,72 122,59 118,58 Z" />
+                  </>
+                )}
               </clipPath>
 
               {/* Glowing anatomical inner shadow */}
               <linearGradient id="body-empty-glow" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2c2c2e" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#161618" stopOpacity="0.8" />
+                <stop offset="0%" stopColor="#2c2c2e" stopOpacity="0.45" />
+                <stop offset="100%" stopColor="#161618" stopOpacity="0.85" />
               </linearGradient>
             </defs>
 
             {/* Empty Body Silhouette Backdrop */}
-            <path
-              d={activeSilhouettePath}
-              fill="url(#body-empty-glow)"
-              stroke="rgba(255, 255, 255, 0.14)"
-              strokeWidth="2"
-              className="transition-colors duration-500"
-            />
+            {currentMode === 'male' ? (
+              <g
+                fill="url(#body-empty-glow)"
+                stroke="rgba(255, 255, 255, 0.16)"
+                strokeWidth="2"
+                className="transition-colors duration-500"
+              >
+                <ellipse cx="110" cy="36" rx="19" ry="23" />
+                <path d="M 98,58 C 94,59 78,74 62,88 C 58,92 56,102 58,124 C 60,148 64,178 68,204 C 70,212 76,214 80,208 C 82,204 82,188 80,166 C 78,144 82,122 88,114 C 92,108 94,116 94,130 C 92,156 90,182 90,206 C 90,232 88,262 86,292 C 84,322 84,350 86,364 C 87,370 92,372 96,370 C 100,368 100,356 100,336 C 100,306 102,276 104,246 C 105,231 106,218 110,212 C 114,218 115,231 116,246 C 118,276 120,306 120,336 C 120,356 120,368 124,370 C 128,372 133,370 134,364 C 136,350 136,322 134,292 C 132,262 130,232 130,206 C 130,182 128,156 126,130 C 126,116 128,108 132,114 C 138,122 142,144 140,166 C 138,188 138,204 140,208 C 144,214 150,212 152,204 C 156,178 160,148 162,124 C 164,102 162,92 158,88 C 142,74 126,59 122,58 Z" />
+              </g>
+            ) : (
+              <g
+                fill="url(#body-empty-glow)"
+                stroke="rgba(255, 255, 255, 0.16)"
+                strokeWidth="2"
+                className="transition-colors duration-500"
+              >
+                <ellipse cx="110" cy="38" rx="17" ry="21" />
+                <path d="M 100,58 C 96,59 84,72 70,86 C 66,90 64,100 66,122 C 68,146 72,176 76,200 C 78,208 84,210 88,204 C 90,200 90,186 88,166 C 86,146 90,126 96,116 C 98,110 98,118 98,130 C 96,155 92,180 92,205 C 92,230 90,260 88,290 C 86,320 86,348 88,362 C 89,368 94,370 98,368 C 102,366 102,355 102,335 C 102,305 103,275 104,245 C 105,230 106,218 110,212 C 114,218 115,230 116,245 C 117,275 118,305 118,335 C 118,355 118,366 122,368 C 126,370 131,368 132,362 C 134,348 134,320 132,290 C 130,260 126,230 126,205 C 126,180 122,155 120,130 C 120,118 120,110 122,116 C 128,126 132,146 130,166 C 128,186 128,200 130,204 C 134,210 140,208 142,200 C 146,176 150,146 152,122 C 154,100 152,90 148,86 C 134,72 122,59 118,58 Z" />
+              </g>
+            )}
           </svg>
 
           {/* HTML Canvas Fluid Layer clipped inside the Body Silhouette */}
@@ -461,27 +487,47 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({
               WebkitClipPath: 'url(#body-silhouette-clip)',
             }}
           >
-            <canvas ref={canvasRef} width={240} height={400} className="w-full h-full block" />
+            <canvas ref={canvasRef} width={220} height={380} className="w-full h-full block" />
           </div>
 
           {/* Outer Silhouette Stroke Glow Layer */}
           <svg
             className="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible"
-            viewBox="0 0 240 400"
+            viewBox="0 0 220 380"
           >
-            <path
-              d={activeSilhouettePath}
-              fill="none"
-              stroke={
-                percentage >= 100
-                  ? 'rgba(48, 209, 88, 0.7)'
-                  : percentage > 0
-                  ? 'rgba(10, 132, 255, 0.45)'
-                  : 'rgba(255, 255, 255, 0.16)'
-              }
-              strokeWidth="2.5"
-              className="transition-colors duration-500"
-            />
+            {currentMode === 'male' ? (
+              <g
+                fill="none"
+                stroke={
+                  percentage >= 100
+                    ? 'rgba(48, 209, 88, 0.7)'
+                    : percentage > 0
+                    ? 'rgba(10, 132, 255, 0.45)'
+                    : 'rgba(255, 255, 255, 0.16)'
+                }
+                strokeWidth="2"
+                className="transition-colors duration-500"
+              >
+                <ellipse cx="110" cy="36" rx="19" ry="23" />
+                <path d="M 98,58 C 94,59 78,74 62,88 C 58,92 56,102 58,124 C 60,148 64,178 68,204 C 70,212 76,214 80,208 C 82,204 82,188 80,166 C 78,144 82,122 88,114 C 92,108 94,116 94,130 C 92,156 90,182 90,206 C 90,232 88,262 86,292 C 84,322 84,350 86,364 C 87,370 92,372 96,370 C 100,368 100,356 100,336 C 100,306 102,276 104,246 C 105,231 106,218 110,212 C 114,218 115,231 116,246 C 118,276 120,306 120,336 C 120,356 120,368 124,370 C 128,372 133,370 134,364 C 136,350 136,322 134,292 C 132,262 130,232 130,206 C 130,182 128,156 126,130 C 126,116 128,108 132,114 C 138,122 142,144 140,166 C 138,188 138,204 140,208 C 144,214 150,212 152,204 C 156,178 160,148 162,124 C 164,102 162,92 158,88 C 142,74 126,59 122,58 Z" />
+              </g>
+            ) : (
+              <g
+                fill="none"
+                stroke={
+                  percentage >= 100
+                    ? 'rgba(48, 209, 88, 0.7)'
+                    : percentage > 0
+                    ? 'rgba(10, 132, 255, 0.45)'
+                    : 'rgba(255, 255, 255, 0.16)'
+                }
+                strokeWidth="2"
+                className="transition-colors duration-500"
+              >
+                <ellipse cx="110" cy="38" rx="17" ry="21" />
+                <path d="M 100,58 C 96,59 84,72 70,86 C 66,90 64,100 66,122 C 68,146 72,176 76,200 C 78,208 84,210 88,204 C 90,200 90,186 88,166 C 86,146 90,126 96,116 C 98,110 98,118 98,130 C 96,155 92,180 92,205 C 92,230 90,260 88,290 C 86,320 86,348 88,362 C 89,368 94,370 98,368 C 102,366 102,355 102,335 C 102,305 103,275 104,245 C 105,230 106,218 110,212 C 114,218 115,230 116,245 C 117,275 118,305 118,335 C 118,355 118,366 122,368 C 126,370 131,368 132,362 C 134,348 134,320 132,290 C 130,260 126,230 126,205 C 126,180 122,155 120,130 C 120,118 120,110 122,116 C 128,126 132,146 130,166 C 128,186 128,200 130,204 C 134,210 140,208 142,200 C 146,176 150,146 152,122 C 154,100 152,90 148,86 C 134,72 122,59 118,58 Z" />
+              </g>
+            )}
           </svg>
 
           {/* ========================================================
@@ -698,134 +744,6 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({
                       <span className="truncate">{o.shortName}</span>
                     </button>
                   ))}
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* ========================================================
-          AVATAR SILHOUETTE SELECTOR MODAL
-      ======================================================== */}
-      <AnimatePresence>
-        {isAvatarPickerOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsAvatarPickerOpen(false)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="relative w-full max-w-md rounded-3xl apple-glass-modal p-5 sm:p-6 z-10 space-y-4 border border-white/[0.12] shadow-2xl"
-            >
-              <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-[#0a84ff]/15 border border-[#0a84ff]/25 text-[#0a84ff]">
-                    <Sliders className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-white">Body Avatar Customizer</h3>
-                    <p className="text-xs text-neutral-400">
-                      Choose your visual silhouette style
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsAvatarPickerOpen(false)}
-                  className="p-1.5 rounded-full text-neutral-400 hover:text-white bg-white/[0.08] transition cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Avatar Options Grid */}
-              <div className="grid grid-cols-2 gap-2.5">
-                {(
-                  [
-                    { id: 'neutral', name: 'Athletic / Neutral', desc: 'Sleek anatomical outline', icon: '🧍' },
-                    { id: 'male', name: 'Male Contour', desc: 'V-taper muscular silhouette', icon: '👨' },
-                    { id: 'female', name: 'Female Contour', desc: 'Graceful hourglass curves', icon: '👩' },
-                    { id: 'cute', name: 'Fun / Chibi', desc: 'Playful character avatar', icon: '🧸' },
-                  ] as const
-                ).map((item) => {
-                  const isSelected = avatarType === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => {
-                        updateProfile({ avatarType: item.id });
-                        setIsAvatarPickerOpen(false);
-                      }}
-                      className={`p-3.5 rounded-2xl text-left border transition cursor-pointer flex flex-col justify-between space-y-2 ${
-                        isSelected
-                          ? 'bg-[#0a84ff]/15 border-[#0a84ff] text-white shadow-lg'
-                          : 'bg-black/40 border-white/[0.06] text-neutral-300 hover:bg-white/[0.04]'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-2xl">{item.icon}</span>
-                        {isSelected && (
-                          <div className="w-4 h-4 rounded-full bg-[#0a84ff] flex items-center justify-center">
-                            <Check className="w-3 h-3 text-white" />
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white">{item.name}</div>
-                        <div className="text-[10px] text-neutral-400">{item.desc}</div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Display Mode Switcher (Body vs Classic Bottle) */}
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-semibold text-white">Visual Mode</div>
-                  <div className="text-[10px] text-neutral-400">
-                    Switch between Human Body & Cylinder
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1 bg-black/50 p-1 rounded-xl border border-white/[0.06]">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      updateProfile({ progressDisplayMode: 'body' });
-                    }}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
-                      (profile.progressDisplayMode || 'body') === 'body'
-                        ? 'bg-[#0a84ff] text-white'
-                        : 'text-neutral-400 hover:text-white'
-                    }`}
-                  >
-                    🧍 Body
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      updateProfile({ progressDisplayMode: 'bottle' });
-                      setIsAvatarPickerOpen(false);
-                    }}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
-                      profile.progressDisplayMode === 'bottle'
-                        ? 'bg-[#0a84ff] text-white'
-                        : 'text-neutral-400 hover:text-white'
-                    }`}
-                  >
-                    🍶 Cylinder
-                  </button>
                 </div>
               </div>
             </motion.div>

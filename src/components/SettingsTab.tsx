@@ -259,7 +259,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <ChevronRight className="w-4 h-4 text-neutral-500 group-hover:text-white transition" />
         </motion.button>
 
-        {/* 7. Body Silhouette & Avatar Style */}
+        {/* 7. Body Silhouette & Visual Mode */}
         <div className="p-4 rounded-3xl apple-card space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3.5">
@@ -268,42 +268,55 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-white">
-                  Body Silhouette & Visual Mode
+                  Hydration Visualizer Mode
                 </h3>
                 <p className="text-xs text-neutral-400">
-                  Custom avatar & interactive biological organ tracking
+                  Select your preferred progress style
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Silhouette Type Buttons */}
-          <div className="grid grid-cols-4 gap-1.5 pt-1">
-            {(
-              [
-                { id: 'neutral', label: 'Athletic', icon: '🧍' },
-                { id: 'male', label: 'Male', icon: '👨' },
-                { id: 'female', label: 'Female', icon: '👩' },
-                { id: 'cute', label: 'Cute', icon: '🧸' },
-              ] as const
-            ).map((item) => {
-              const isSelected = (profile.avatarType || 'neutral') === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => updateProfile({ avatarType: item.id, progressDisplayMode: 'body' })}
-                  className={`p-2 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center gap-1 ${
-                    isSelected && (profile.progressDisplayMode || 'body') === 'body'
-                      ? 'bg-[#0a84ff]/20 border-[#0a84ff] text-white shadow-md'
-                      : 'bg-black/40 border-white/[0.06] text-neutral-400 hover:text-white'
-                  }`}
-                >
-                  <span className="text-xl">{item.icon}</span>
-                  <span className="text-[10px] font-semibold truncate">{item.label}</span>
-                </button>
-              );
-            })}
+          {/* 3 Visual Mode Buttons */}
+          <div className="grid grid-cols-3 gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => updateProfile({ progressDisplayMode: 'male', avatarType: 'male' })}
+              className={`p-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center gap-1.5 ${
+                profile.progressDisplayMode === 'male' || (!profile.progressDisplayMode && profile.avatarType !== 'female')
+                  ? 'bg-[#0a84ff]/20 border-[#0a84ff] text-white shadow-md'
+                  : 'bg-black/40 border-white/[0.06] text-neutral-400 hover:text-white'
+              }`}
+            >
+              <span className="text-2xl">👨</span>
+              <span className="text-xs font-semibold">Male Body</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => updateProfile({ progressDisplayMode: 'female', avatarType: 'female' })}
+              className={`p-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center gap-1.5 ${
+                profile.progressDisplayMode === 'female'
+                  ? 'bg-[#0a84ff]/20 border-[#0a84ff] text-white shadow-md'
+                  : 'bg-black/40 border-white/[0.06] text-neutral-400 hover:text-white'
+              }`}
+            >
+              <span className="text-2xl">👩</span>
+              <span className="text-xs font-semibold">Female Body</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => updateProfile({ progressDisplayMode: 'bottle' })}
+              className={`p-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center gap-1.5 ${
+                profile.progressDisplayMode === 'bottle'
+                  ? 'bg-[#0a84ff]/20 border-[#0a84ff] text-white shadow-md'
+                  : 'bg-black/40 border-white/[0.06] text-neutral-400 hover:text-white'
+              }`}
+            >
+              <span className="text-2xl">🍶</span>
+              <span className="text-xs font-semibold">Cylinder</span>
+            </button>
           </div>
         </div>
 

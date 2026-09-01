@@ -195,23 +195,46 @@ export const LiquidBottle: React.FC<{ onQuickAdd?: () => void }> = ({ onQuickAdd
           <canvas ref={canvasRef} width={280} height={340} className="w-full h-full block" />
         </div>
 
-        {/* Top Minimal Pill Header & Mode Switcher */}
-        <div className="w-full z-20 flex items-center justify-between pt-1 px-1">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
-            Daily Progress
-          </span>
+        {/* Top 3-Mode Segmented Control: [ 👨 Male ] [ 👩 Female ] [ 🍶 Cylinder ] */}
+        <div className="w-full z-20 flex items-center justify-between gap-1.5 pt-1 px-1">
+          <div className="flex items-center gap-1 bg-black/50 p-1 rounded-2xl border border-white/[0.08] backdrop-blur-md">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                updateProfile({ progressDisplayMode: 'male', avatarType: 'male' });
+              }}
+              className="px-2.5 py-1 rounded-xl text-[11px] font-semibold text-neutral-400 hover:text-white transition cursor-pointer flex items-center gap-1"
+            >
+              <span>👨 Male</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              updateProfile({ progressDisplayMode: 'body' });
-            }}
-            className="px-2.5 py-1 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-[10px] font-semibold text-neutral-300 flex items-center gap-1 transition cursor-pointer backdrop-blur-md"
-            title="Switch to Human Body Silhouette View"
-          >
-            <span>🧍 Body View</span>
-          </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                updateProfile({ progressDisplayMode: 'female', avatarType: 'female' });
+              }}
+              className="px-2.5 py-1 rounded-xl text-[11px] font-semibold text-neutral-400 hover:text-white transition cursor-pointer flex items-center gap-1"
+            >
+              <span>👩 Female</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                updateProfile({ progressDisplayMode: 'bottle' });
+              }}
+              className="px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-[#0a84ff] text-white shadow-sm transition cursor-pointer flex items-center gap-1"
+            >
+              <span>🍶 Cylinder</span>
+            </button>
+          </div>
+
+          <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider pr-1">
+            Progress
+          </span>
         </div>
 
         {/* Central Clean Typography HUD */}
