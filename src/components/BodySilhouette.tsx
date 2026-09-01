@@ -10,14 +10,14 @@ import {
 } from 'lucide-react';
 import { useWater } from '../context/WaterContext';
 
-// 6 Major Biological Organ Milestones (normalized to 0 0 200 320 coordinate box)
+// 6 Major Biological Organ Milestones (normalized to 0 0 200 300 coordinate box)
 export interface OrganMilestone {
   id: string;
   name: string;
   shortName: string;
   emoji: string;
-  cx: number; // in 0 0 200 320 coordinate space
-  cy: number; // in 0 0 200 320 coordinate space
+  cx: number; // in 0 0 200 300 coordinate space
+  cy: number; // in 0 0 200 300 coordinate space
   thresholdPercent: number; // % hydration required to activate
   title: string;
   scienceNote: string;
@@ -32,7 +32,7 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     shortName: 'Brain',
     emoji: '🧠',
     cx: 100,
-    cy: 32,
+    cy: 28,
     thresholdPercent: 90,
     title: 'Cognitive Optimization & Alertness',
     scienceNote:
@@ -46,7 +46,7 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     shortName: 'Lungs',
     emoji: '🫁',
     cx: 100,
-    cy: 90,
+    cy: 82,
     thresholdPercent: 75,
     title: 'Moist Mucous Membranes & Oxygen Exchange',
     scienceNote:
@@ -60,7 +60,7 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     shortName: 'Heart',
     emoji: '🫀',
     cx: 93,
-    cy: 112,
+    cy: 104,
     thresholdPercent: 60,
     title: 'Blood Plasma Volume & Stroke Power',
     scienceNote:
@@ -74,7 +74,7 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     shortName: 'Kidneys',
     emoji: '🫧',
     cx: 100,
-    cy: 148,
+    cy: 138,
     thresholdPercent: 45,
     title: 'Waste Detoxification & Mineral Balance',
     scienceNote:
@@ -88,7 +88,7 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     shortName: 'Metabolism',
     emoji: '⚡',
     cx: 100,
-    cy: 172,
+    cy: 162,
     thresholdPercent: 30,
     title: 'Enzyme Activation & Nutrient Transport',
     scienceNote:
@@ -102,7 +102,7 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     shortName: 'Muscles & Joints',
     emoji: '🦵',
     cx: 100,
-    cy: 240,
+    cy: 228,
     thresholdPercent: 15,
     title: 'Synovial Lubrication & Cramp Defense',
     scienceNote:
@@ -112,12 +112,12 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
   },
 ];
 
-// Precision Medical-Grade Vector Silhouettes (ViewBox 0 0 200 320)
+// Precision Medical Silhouettes generated from Reference Vector Diagram (ViewBox 0 0 200 300)
 const MALE_BODY_PATH_D =
-  'M 100,10 C 108,10 114,16 115,24 C 116,25 119,27 119,33 C 119,38 116,40 114,41 C 113,47 108,54 100,54 C 92,54 87,47 86,41 C 84,40 81,38 81,33 C 81,27 84,25 85,24 C 86,16 92,10 100,10 Z M 106,54 C 106,62 108,68 112,70 C 122,74 135,80 142,88 C 146,92 148,102 147,118 C 146,132 144,148 147,162 C 149,174 153,184 154,192 C 155,195 160,200 161,206 C 162,211 157,212 154,209 C 152,212 149,222 146,222 C 143,222 141,216 142,208 C 142,202 139,188 138,176 C 137,162 135,148 134,136 C 133,124 130,112 124,106 C 122,112 120,126 120,140 C 120,154 122,168 124,180 C 125,188 126,198 125,212 C 124,228 122,246 121,262 C 120,274 122,286 122,298 C 122,306 118,312 116,314 C 118,315 122,316 120,320 C 117,322 112,321 110,318 C 108,315 108,308 108,298 C 108,286 107,274 107,262 C 107,246 106,228 105,212 C 104,198 102,185 100,180 C 98,185 96,198 95,212 C 94,228 93,246 93,262 C 93,274 92,286 92,298 C 92,308 92,315 90,318 C 88,321 83,322 80,320 C 78,316 82,315 84,314 C 82,312 78,306 78,298 C 78,286 80,274 79,262 C 78,246 76,228 75,212 C 74,198 75,188 76,180 C 78,168 80,154 80,140 C 80,126 78,112 76,106 C 70,112 67,124 66,136 C 65,148 63,162 62,176 C 61,188 58,202 58,208 C 59,216 57,222 54,222 C 51,222 48,212 46,209 C 43,212 38,211 39,206 C 40,200 45,195 46,192 C 47,184 51,174 53,162 C 56,148 54,132 53,118 C 52,102 54,92 58,88 C 65,80 78,74 88,70 C 92,68 94,62 94,54 Z';
+  'M 95.9,8.2 L 89.2,12.8 L 86.6,20.4 L 84.6,28.2 L 85.9,35.8 L 89.4,43.1 L 86.6,50.4 L 79.4,53.9 L 71.8,56.7 L 64.4,59.5 L 59.3,65.7 L 58.1,73.8 L 57.5,82.3 L 55.1,89.9 L 53.1,97.8 L 49.1,104.7 L 45.1,111.8 L 43.1,119.6 L 40.6,127.2 L 37.8,134.7 L 34.1,141.9 L 28.0,146.9 L 22.2,152.5 L 28.2,154.1 L 26.6,161.8 L 27.2,167.5 L 33.6,170.3 L 39.7,167.4 L 42.5,159.9 L 44.3,152.0 L 46.0,144.0 L 49.3,136.7 L 54.4,130.2 L 59.0,123.4 L 63.5,116.7 L 65.9,109.0 L 68.3,101.3 L 71.0,93.7 L 74.4,99.1 L 75.6,107.3 L 75.5,116.0 L 75.2,124.5 L 72.8,132.1 L 71.9,140.4 L 71.0,148.7 L 70.0,157.0 L 69.1,165.3 L 69.1,173.9 L 70.1,182.2 L 71.8,190.1 L 72.9,198.4 L 72.8,207.0 L 71.3,215.1 L 69.2,222.9 L 69.1,231.5 L 70.1,239.7 L 71.1,248.0 L 72.9,255.9 L 73.7,264.2 L 72.9,272.5 L 69.9,279.9 L 64.6,286.4 L 70.5,290.1 L 78.0,291.2 L 82.7,285.7 L 85.7,278.2 L 85.8,270.4 L 84.8,262.1 L 85.7,253.8 L 87.0,245.7 L 89.1,237.9 L 90.2,229.7 L 89.4,221.5 L 88.9,213.3 L 91.2,205.7 L 92.6,197.6 L 94.0,189.5 L 95.0,181.3 L 97.8,173.8 L 99.4,165.7 L 100.9,173.6 L 103.3,181.3 L 104.8,189.3 L 105.9,197.5 L 106.9,205.8 L 108.9,213.6 L 108.8,221.6 L 107.9,229.8 L 108.7,238.1 L 111.5,245.6 L 112.4,253.9 L 113.3,262.2 L 112.9,270.3 L 112.5,278.4 L 115.9,285.6 L 120.8,291.1 L 129.1,290.2 L 133.2,285.1 L 128.1,278.6 L 125.3,271.1 L 124.3,262.8 L 125.8,254.7 L 127.2,246.6 L 128.0,238.3 L 129.1,230.1 L 128.0,221.9 L 126.7,213.8 L 125.4,205.6 L 125.4,197.0 L 126.9,189.0 L 128.1,180.8 L 129.0,172.5 L 129.0,163.9 L 128.1,155.6 L 127.1,147.3 L 125.4,139.4 L 124.5,131.1 L 122.6,123.3 L 122.6,114.6 L 122.7,106.7 L 124.4,98.8 L 127.2,94.4 L 130.4,101.7 L 132.6,109.5 L 135.3,117.0 L 139.3,124.0 L 144.5,130.5 L 148.7,137.4 L 152.8,144.4 L 153.9,152.6 L 156.6,160.1 L 158.8,168.0 L 164.0,170.2 L 169.6,168.1 L 173.2,163.9 L 170.4,156.5 L 175.4,154.6 L 172.7,149.4 L 167.1,143.1 L 161.5,137.2 L 158.5,129.8 L 155.7,122.3 L 154.2,114.2 L 151.0,106.9 L 145.9,100.4 L 143.8,92.6 L 142.2,84.6 L 140.1,76.8 L 140.1,68.1 L 136.1,61.1 L 129.2,56.9 L 121.5,54.7 L 114.1,51.5 L 109.6,45.6 L 110.8,37.3 L 114.2,30.1 L 112.5,22.2 L 110.5,14.3 L 104.1,8.9 Z';
 
 const FEMALE_BODY_PATH_D =
-  'M 100,12 C 107,12 113,18 114,25 C 115,26 118,28 118,34 C 118,38 115,40 113,41 C 111,47 106,54 100,54 C 94,54 89,47 87,41 C 85,40 82,38 82,34 C 82,28 85,26 86,25 C 87,18 93,12 100,12 Z M 104,54 C 104,62 106,68 110,70 C 118,74 128,80 134,88 C 138,92 140,102 139,118 C 138,132 137,148 140,162 C 142,174 146,184 147,192 C 148,195 153,200 154,206 C 155,211 150,212 147,209 C 145,212 143,222 140,222 C 137,222 135,216 136,208 C 136,202 133,188 132,176 C 131,162 129,148 128,136 C 127,124 124,112 119,106 C 117,112 114,124 113,138 C 112,150 114,162 118,172 C 122,182 126,192 125,206 C 124,222 121,244 120,260 C 119,274 121,286 121,298 C 121,306 117,312 115,314 C 117,315 120,316 119,320 C 116,322 111,321 109,318 C 108,315 108,308 108,298 C 108,286 107,274 107,260 C 107,244 105,222 104,206 C 103,194 102,185 100,180 C 98,185 97,194 96,206 C 95,222 93,244 93,260 C 93,274 92,286 92,298 C 92,308 92,315 91,318 C 89,321 84,322 81,320 C 80,316 83,315 85,314 C 83,312 79,306 79,298 C 79,286 81,274 80,260 C 79,244 76,222 75,206 C 74,192 78,182 82,172 C 86,162 88,150 87,138 C 86,124 83,112 81,106 C 76,112 73,124 72,136 C 71,148 69,162 68,176 C 67,188 64,202 64,208 C 65,216 63,222 60,222 C 57,222 55,212 53,209 C 50,212 45,211 46,206 C 47,200 52,195 53,192 C 54,184 58,174 60,162 C 63,148 62,132 61,118 C 60,102 62,92 66,88 C 72,80 82,74 90,70 C 94,68 96,62 96,54 Z';
+  'M 95.0,8.2 L 88.9,13.2 L 86.6,21.0 L 84.8,29.1 L 86.9,37.0 L 90.6,44.3 L 89.6,51.9 L 82.3,55.6 L 74.0,56.9 L 67.0,61.5 L 64.1,69.1 L 62.8,77.3 L 61.5,85.6 L 59.3,93.5 L 57.1,101.3 L 52.9,108.4 L 49.6,115.8 L 47.5,123.7 L 44.6,131.3 L 41.3,138.7 L 35.8,144.8 L 29.5,150.9 L 30.1,154.6 L 31.7,158.9 L 29.4,166.9 L 35.6,169.0 L 41.2,165.7 L 45.2,160.9 L 47.9,153.2 L 48.8,144.8 L 52.1,137.4 L 56.9,130.6 L 61.3,123.6 L 66.1,116.8 L 69.0,109.3 L 70.7,101.2 L 73.6,93.6 L 77.4,96.9 L 79.1,105.0 L 78.8,113.5 L 75.5,120.9 L 72.8,128.6 L 70.7,136.5 L 69.2,144.7 L 68.2,153.0 L 68.2,161.8 L 69.2,170.2 L 70.7,178.4 L 72.8,186.3 L 74.7,194.3 L 75.6,202.7 L 75.6,211.5 L 74.6,219.9 L 72.7,227.9 L 73.8,236.3 L 74.7,244.7 L 76.5,252.7 L 78.4,260.8 L 78.3,268.8 L 78.0,277.4 L 73.0,283.8 L 73.5,290.1 L 81.8,291.2 L 87.4,286.4 L 89.4,279.7 L 89.4,271.7 L 88.4,263.2 L 90.4,255.3 L 91.3,246.8 L 93.1,238.8 L 93.1,230.0 L 92.1,221.6 L 93.0,213.2 L 94.8,205.2 L 94.9,196.4 L 95.9,188.0 L 96.8,179.6 L 97.6,171.2 L 98.7,162.8 L 98.4,154.7 L 100.4,160.6 L 101.4,169.0 L 102.0,177.6 L 103.1,185.9 L 103.1,194.7 L 104.2,203.0 L 105.1,211.4 L 106.9,219.5 L 106.0,227.9 L 106.0,236.6 L 107.9,244.6 L 108.7,253.1 L 109.7,261.5 L 109.6,269.4 L 109.8,278.3 L 110.9,285.8 L 116.4,291.2 L 124.8,290.2 L 126.6,284.8 L 120.9,278.4 L 119.9,270.0 L 120.8,261.6 L 121.9,253.3 L 124.0,245.4 L 125.3,237.2 L 126.3,228.8 L 124.3,220.8 L 123.4,212.4 L 123.5,203.6 L 124.2,195.1 L 126.4,187.2 L 128.1,179.1 L 130.0,171.1 L 131.0,162.7 L 130.9,153.9 L 130.0,145.5 L 128.2,137.5 L 126.3,129.5 L 123.5,121.8 L 120.2,114.4 L 119.7,105.7 L 121.4,97.7 L 125.1,93.4 L 127.9,101.0 L 129.9,109.0 L 132.7,116.6 L 137.3,123.5 L 141.7,130.5 L 146.0,137.5 L 149.3,144.9 L 151.0,153.0 L 153.6,160.7 L 157.4,166.4 L 162.2,169.4 L 169.6,166.8 L 166.9,159.2 L 168.9,154.7 L 169.3,150.5 L 163.1,144.3 L 157.6,138.4 L 154.3,130.9 L 151.4,123.4 L 149.3,115.4 L 146.1,108.0 L 142.0,100.9 L 139.2,93.3 L 137.4,85.2 L 136.2,76.9 L 135.2,68.6 L 131.2,61.4 L 124.6,56.9 L 116.5,55.4 L 109.2,51.8 L 108.6,43.8 L 112.2,36.6 L 114.3,28.6 L 112.5,20.6 L 110.4,12.7 L 103.5,8.4 Z';
 
 interface BodySilhouetteProps {
   onQuickAdd?: () => void;
@@ -172,33 +172,33 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
     };
   }, []);
 
-  // Compute precise SVG Wave Paths inside the 0 0 200 320 coordinate box
+  // Compute precise SVG Wave Paths inside the 0 0 200 300 coordinate box
   const { frontWavePath, backWavePath, meniscusPath } = useMemo(() => {
     if (percentage <= 0) {
       return { frontWavePath: '', backWavePath: '', meniscusPath: '' };
     }
 
-    const totalHeight = 320;
+    const totalHeight = 300;
     const waterHeight = (percentage / 100) * totalHeight;
     const baseWaterY = totalHeight - waterHeight;
 
     // Front Wave
-    let front = `M 0 320 L 0 ${baseWaterY} `;
+    let front = `M 0 300 L 0 ${baseWaterY} `;
     let meniscus = `M 0 ${baseWaterY} `;
     for (let x = 0; x <= 200; x += 5) {
       const waveY = baseWaterY + Math.sin(x * 0.035 + phase) * amplitude;
       front += `L ${x} ${waveY} `;
       meniscus += `L ${x} ${waveY} `;
     }
-    front += `L 200 320 Z`;
+    front += `L 200 300 Z`;
 
     // Back Wave
-    let back = `M 0 320 L 0 ${baseWaterY} `;
+    let back = `M 0 300 L 0 ${baseWaterY} `;
     for (let x = 0; x <= 200; x += 5) {
       const waveY = baseWaterY + Math.sin(x * 0.03 + phase + Math.PI) * (amplitude * 0.7);
       back += `L ${x} ${waveY} `;
     }
-    back += `L 200 320 Z`;
+    back += `L 200 300 Z`;
 
     return {
       frontWavePath: front,
@@ -345,11 +345,11 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
         </div>
 
         {/* ========================================================
-            THE PRECISION ANATOMICAL VECTOR HUMAN BODY CANVAS
+            THE PRECISION MEDICAL VECTOR HUMAN BODY CANVAS
         ======================================================== */}
         <div className="relative w-[190px] h-[270px] flex items-center justify-center my-auto">
           <svg
-            viewBox="0 0 200 320"
+            viewBox="0 0 200 300"
             className="w-full h-full overflow-visible drop-shadow-xl select-none"
           >
             <defs>
@@ -430,9 +430,9 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
             const isHydrated = percentage >= organ.thresholdPercent;
             const isSelected = selectedOrgan?.id === organ.id;
 
-            // Compute exact relative % inside the 200x320 SVG coordinate frame
+            // Compute exact relative % inside the 200x300 SVG coordinate frame
             const leftPercent = (organ.cx / 200) * 100;
-            const topPercent = (organ.cy / 320) * 100;
+            const topPercent = (organ.cy / 300) * 100;
 
             return (
               <button
