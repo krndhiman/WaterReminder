@@ -62,7 +62,7 @@ export interface ReminderSchedule {
   smartSilenceEnabled: boolean; // Auto-silence reminder if user drank within last 30m
 }
 
-export type ProgressDisplayMode = 'body' | 'bottle';
+export type ProgressDisplayMode = 'male' | 'female' | 'bottle';
 
 export interface UserProfile {
   dailyGoal: number; // base goal default 4000

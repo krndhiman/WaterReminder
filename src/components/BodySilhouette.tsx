@@ -7,7 +7,6 @@ import {
   X,
   ShieldCheck,
   Flame,
-  User,
 } from 'lucide-react';
 import { useWater } from '../context/WaterContext';
 
@@ -17,8 +16,8 @@ export interface OrganMilestone {
   name: string;
   shortName: string;
   emoji: string;
-  cx: number; // in 0 0 200 320 coordinate space
-  cy: number; // in 0 0 200 320 coordinate space
+  cx: number; // in 0 0 200 360 coordinate space
+  cy: number; // in 0 0 200 360 coordinate space
   thresholdPercent: number; // % hydration required to activate
   title: string;
   scienceNote: string;
@@ -33,7 +32,7 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     shortName: 'Brain',
     emoji: '🧠',
     cx: 100,
-    cy: 30,
+    cy: 36,
     thresholdPercent: 90,
     title: 'Cognitive Optimization & Alertness',
     scienceNote:
@@ -47,7 +46,7 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     shortName: 'Lungs',
     emoji: '🫁',
     cx: 100,
-    cy: 82,
+    cy: 95,
     thresholdPercent: 75,
     title: 'Moist Mucous Membranes & Oxygen Exchange',
     scienceNote:
@@ -61,7 +60,7 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     shortName: 'Heart',
     emoji: '🫀',
     cx: 93,
-    cy: 108,
+    cy: 118,
     thresholdPercent: 60,
     title: 'Blood Plasma Volume & Stroke Power',
     scienceNote:
@@ -75,7 +74,7 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     shortName: 'Kidneys',
     emoji: '🫧',
     cx: 100,
-    cy: 146,
+    cy: 155,
     thresholdPercent: 45,
     title: 'Waste Detoxification & Mineral Balance',
     scienceNote:
@@ -89,7 +88,7 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     shortName: 'Metabolism',
     emoji: '⚡',
     cx: 100,
-    cy: 172,
+    cy: 185,
     thresholdPercent: 30,
     title: 'Enzyme Activation & Nutrient Transport',
     scienceNote:
@@ -103,7 +102,7 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     shortName: 'Muscles & Joints',
     emoji: '🦵',
     cx: 100,
-    cy: 235,
+    cy: 260,
     thresholdPercent: 15,
     title: 'Synovial Lubrication & Cramp Defense',
     scienceNote:
@@ -113,9 +112,12 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
   },
 ];
 
-// Unified Human Body Vector Contour
-const BODY_PATH_D =
-  'M 93,48 C 90,49 76,60 62,72 C 57,76 54,84 56,102 C 58,122 62,148 66,170 C 68,178 74,180 78,174 C 80,170 80,156 78,138 C 76,120 80,102 85,96 C 88,90 90,96 90,108 C 88,130 86,152 86,172 C 86,194 84,220 82,246 C 80,272 80,294 82,304 C 83,309 88,310 91,308 C 94,306 94,296 94,278 C 94,252 95,226 96,200 C 97,188 98,178 100,172 C 102,178 103,188 104,200 C 105,226 106,252 106,278 C 106,296 106,306 109,308 C 112,310 117,309 118,304 C 120,294 120,272 118,246 C 116,220 114,194 114,172 C 114,152 112,130 110,108 C 110,96 112,90 115,96 C 120,102 124,120 122,138 C 120,156 120,170 122,174 C 126,180 132,178 134,170 C 138,148 142,122 144,102 C 146,84 143,76 138,72 C 124,60 110,49 107,48 Z';
+// Precision Anatomical Vector Silhouettes (ViewBox 0 0 200 360)
+const MALE_BODY_PATH_D =
+  'M 100,14 C 112,14 116,22 116,30 C 118,32 121,34 121,42 C 121,48 117,50 115,52 C 113,58 108,66 100,66 C 92,66 87,58 85,52 C 83,50 79,48 79,42 C 79,34 82,32 84,30 C 84,22 88,14 100,14 Z M 93,66 C 93,66 92,76 92,80 C 92,80 76,86 58,94 C 54,96 52,102 52,114 C 52,126 53,145 53,145 C 53,145 50,165 48,178 C 46,192 45,202 45,202 C 43,206 36,212 35,222 C 34,228 40,230 43,226 C 44,224 45,232 46,240 C 47,244 52,244 53,240 C 55,232 56,222 56,222 C 56,222 55,208 54,202 C 54,196 56,184 57,178 C 59,165 62,148 62,148 C 62,148 68,135 70,118 C 70,118 76,138 78,155 C 80,172 74,195 74,195 C 74,195 75,230 75,230 C 75,230 78,270 78,270 C 78,270 76,302 76,302 C 76,302 84,335 84,335 C 84,335 82,348 78,354 C 76,357 82,359 86,356 C 90,353 92,345 92,335 C 92,325 92,302 92,302 C 92,302 94,270 94,270 C 94,270 95,230 95,230 C 95,230 98,198 100,195 C 102,198 105,230 105,230 C 105,230 106,270 106,270 C 106,270 108,302 108,302 C 108,302 108,325 108,335 C 108,345 110,353 114,356 C 118,359 124,357 122,354 C 118,348 116,335 116,335 C 116,335 124,302 124,302 C 124,302 122,270 122,270 C 122,270 125,230 125,230 C 125,230 126,195 126,195 C 126,195 120,172 122,155 C 124,138 130,118 130,118 C 132,135 138,148 138,148 C 138,148 141,165 143,178 C 144,184 146,196 146,202 C 145,208 144,222 144,222 C 144,222 145,232 147,240 C 148,244 153,244 154,240 C 155,232 156,224 157,226 C 160,230 166,228 165,222 C 164,212 157,206 155,202 C 155,202 154,192 152,178 C 150,165 147,145 147,145 C 147,145 148,126 148,114 C 148,102 146,96 142,94 C 124,86 108,80 108,80 C 108,76 107,66 107,66 Z';
+
+const FEMALE_BODY_PATH_D =
+  'M 100,18 C 111,18 115,25 115,33 C 117,35 120,37 120,44 C 120,49 116,51 114,53 C 112,59 106,66 100,66 C 94,66 88,59 86,53 C 84,51 80,49 80,44 C 80,37 83,35 85,33 C 85,25 89,18 100,18 Z M 95,66 C 95,66 94,76 94,78 C 94,78 80,84 66,92 C 63,94 62,100 62,110 C 62,122 61,142 61,142 C 61,142 58,165 56,178 C 54,192 52,206 52,206 C 50,210 43,215 42,222 C 41,228 47,230 50,226 C 51,224 51,232 52,240 C 53,244 58,244 59,240 C 61,232 60,222 60,222 C 60,222 60,212 60,206 C 60,200 62,188 64,178 C 66,165 69,145 69,145 C 69,145 74,132 76,118 C 76,118 84,136 85,150 C 86,168 72,192 72,192 C 72,192 74,230 74,230 C 74,230 79,270 79,270 C 79,270 78,302 78,302 C 78,302 85,335 85,335 C 85,335 83,348 80,354 C 78,357 84,359 88,356 C 92,353 93,345 93,335 C 93,325 93,302 93,302 C 93,302 94,270 94,270 C 94,270 96,230 96,230 C 96,230 98,195 100,192 C 102,195 104,230 104,230 C 104,230 106,270 106,270 C 106,270 107,302 107,302 C 107,302 107,325 107,335 C 107,345 108,353 112,356 C 116,359 122,357 120,354 C 117,348 115,335 115,335 C 115,335 122,302 122,302 C 122,302 121,270 121,270 C 121,270 126,230 126,230 C 126,230 128,192 128,192 C 128,192 114,168 115,150 C 116,136 124,118 124,118 C 126,132 131,145 131,145 C 131,145 134,165 136,178 C 138,188 140,200 140,206 C 140,212 140,222 140,222 C 140,222 139,232 141,240 C 142,244 147,244 148,240 C 149,232 149,224 150,226 C 153,230 159,228 158,222 C 157,215 150,210 148,206 C 148,206 146,192 144,178 C 142,165 139,142 139,142 C 139,142 138,122 138,110 C 138,100 137,94 134,92 C 120,84 106,78 106,78 C 106,76 105,66 105,66 Z';
 
 interface BodySilhouetteProps {
   onQuickAdd?: () => void;
@@ -129,6 +131,10 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
   const netTotal = selectedRecord.netTotal || grossTotal;
   const percentage = Math.min(100, Math.max(0, Math.round((netTotal / selectedRecord.goal) * 100)));
   const remainingMl = Math.max(0, selectedRecord.goal - netTotal);
+
+  // Active silhouette: 'male' | 'female' (default male)
+  const isFemale = profile.progressDisplayMode === 'female';
+  const activeBodyPath = isFemale ? FEMALE_BODY_PATH_D : MALE_BODY_PATH_D;
 
   const [selectedOrgan, setSelectedOrgan] = useState<OrganMilestone | null>(null);
 
@@ -166,33 +172,33 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
     };
   }, []);
 
-  // Compute precise SVG Wave Paths inside the 0 0 200 320 coordinate box
+  // Compute precise SVG Wave Paths inside the 0 0 200 360 coordinate box
   const { frontWavePath, backWavePath, meniscusPath } = useMemo(() => {
     if (percentage <= 0) {
       return { frontWavePath: '', backWavePath: '', meniscusPath: '' };
     }
 
-    const totalHeight = 320;
+    const totalHeight = 360;
     const waterHeight = (percentage / 100) * totalHeight;
     const baseWaterY = totalHeight - waterHeight;
 
     // Front Wave
-    let front = `M 0 320 L 0 ${baseWaterY} `;
+    let front = `M 0 360 L 0 ${baseWaterY} `;
     let meniscus = `M 0 ${baseWaterY} `;
     for (let x = 0; x <= 200; x += 5) {
       const waveY = baseWaterY + Math.sin(x * 0.035 + phase) * amplitude;
       front += `L ${x} ${waveY} `;
       meniscus += `L ${x} ${waveY} `;
     }
-    front += `L 200 320 Z`;
+    front += `L 200 360 Z`;
 
     // Back Wave
-    let back = `M 0 320 L 0 ${baseWaterY} `;
+    let back = `M 0 360 L 0 ${baseWaterY} `;
     for (let x = 0; x <= 200; x += 5) {
       const waveY = baseWaterY + Math.sin(x * 0.03 + phase + Math.PI) * (amplitude * 0.7);
       back += `L ${x} ${waveY} `;
     }
-    back += `L 200 320 Z`;
+    back += `L 200 360 Z`;
 
     return {
       frontWavePath: front,
@@ -228,7 +234,7 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
       <motion.div
         whileTap={{ scale: 0.99 }}
         onClick={handleBodyTap}
-        className="relative w-full max-w-[320px] h-[430px] rounded-[44px] p-4 cursor-pointer apple-card overflow-hidden flex flex-col items-center justify-between shadow-2xl border border-white/[0.08]"
+        className="relative w-full max-w-[320px] h-[450px] rounded-[44px] p-4 cursor-pointer apple-card overflow-hidden flex flex-col items-center justify-between shadow-2xl border border-white/[0.08]"
       >
         {/* Background Ambient Radial Glow */}
         <div
@@ -241,18 +247,37 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
           }}
         />
 
-        {/* Top Control Bar: [ 🧍 Human Body ] [ 🍶 Cylinder ] & Organ Badge */}
+        {/* Top 3-Mode Segmented Control: [ 👨 Male ] [ 👩 Female ] [ 🍶 Cylinder ] */}
         <div className="w-full z-20 flex items-center justify-between gap-1.5 pt-1 px-1">
           <div className="flex items-center gap-1 bg-black/50 p-1 rounded-2xl border border-white/[0.08] backdrop-blur-md">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                updateProfile({ progressDisplayMode: 'body' });
+                updateProfile({ progressDisplayMode: 'male' });
               }}
-              className="px-3 py-1 rounded-xl text-[11px] font-semibold bg-[#0a84ff] text-white shadow-sm transition cursor-pointer flex items-center gap-1.5"
+              className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 ${
+                !isFemale
+                  ? 'bg-[#0a84ff] text-white shadow-sm'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
             >
-              <span>🧍 Human Body</span>
+              <span>👨 Male</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                updateProfile({ progressDisplayMode: 'female' });
+              }}
+              className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 ${
+                isFemale
+                  ? 'bg-[#0a84ff] text-white shadow-sm'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <span>👩 Female</span>
             </button>
 
             <button
@@ -261,8 +286,8 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
                 e.stopPropagation();
                 updateProfile({ progressDisplayMode: 'bottle' });
               }}
-              className="px-3 py-1 rounded-xl text-[11px] font-semibold text-neutral-400 hover:text-white transition cursor-pointer flex items-center gap-1.5"
-              title="Switch to Cylinder Bottle View"
+              className="px-2.5 py-1 rounded-xl text-[11px] font-semibold text-neutral-400 hover:text-white transition cursor-pointer flex items-center gap-1"
+              title="Switch to Cylinder Bottle view"
             >
               <span>🍶 Cylinder</span>
             </button>
@@ -275,7 +300,7 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
               e.stopPropagation();
               setSelectedOrgan(ORGAN_MILESTONES[0]);
             }}
-            className={`px-2.5 py-1 rounded-full border text-[10px] font-semibold flex items-center gap-1.5 transition cursor-pointer backdrop-blur-md shrink-0 ${
+            className={`px-2.5 py-1 rounded-full border text-[10px] font-semibold flex items-center gap-1 transition cursor-pointer backdrop-blur-md shrink-0 ${
               hydratedOrgansCount === ORGAN_MILESTONES.length
                 ? 'bg-[#30d158]/15 border-[#30d158]/30 text-[#30d158]'
                 : 'bg-[#0a84ff]/10 border-[#0a84ff]/25 text-[#0a84ff]'
@@ -320,11 +345,11 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
         </div>
 
         {/* ========================================================
-            THE PURE SVG WATERMINDER-STYLE HUMAN BODY VISUALIZER
+            THE PRECISION ANATOMICAL VECTOR HUMAN BODY CANVAS
         ======================================================== */}
-        <div className="relative w-[210px] h-[310px] flex items-center justify-center my-auto">
+        <div className="relative w-[190px] h-[320px] flex items-center justify-center my-auto">
           <svg
-            viewBox="0 0 200 320"
+            viewBox="0 0 200 360"
             className="w-full h-full overflow-visible drop-shadow-xl select-none"
           >
             <defs>
@@ -348,12 +373,9 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
                 <stop offset="100%" stopColor="#002d5a" />
               </linearGradient>
 
-              {/* The Single Vector Anatomical ClipPath */}
-              <clipPath id="waterminder-body-clip">
-                {/* Head */}
-                <ellipse cx="100" cy="30" rx="17" ry="20" />
-                {/* Torso, Arms & Legs */}
-                <path d={BODY_PATH_D} />
+              {/* The True Vector Anatomical ClipPath */}
+              <clipPath id="anatomical-body-clip">
+                <path d={activeBodyPath} />
               </clipPath>
             </defs>
 
@@ -361,16 +383,15 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
             <g
               fill="url(#body-glass-bg)"
               stroke="rgba(255, 255, 255, 0.16)"
-              strokeWidth="2"
+              strokeWidth="1.8"
               className="transition-colors duration-500"
             >
-              <ellipse cx="100" cy="30" rx="17" ry="20" />
-              <path d={BODY_PATH_D} />
+              <path d={activeBodyPath} />
             </g>
 
             {/* 2. Fluid Wave Layer (Clipped 100% inside the Human Body) */}
             {percentage > 0 && (
-              <g clipPath="url(#waterminder-body-clip)">
+              <g clipPath="url(#anatomical-body-clip)">
                 {/* Back Wave */}
                 <path d={backWavePath} fill="url(#body-water-back)" />
                 {/* Front Wave */}
@@ -395,11 +416,10 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
                   ? 'rgba(10, 132, 255, 0.5)'
                   : 'rgba(255, 255, 255, 0.18)'
               }
-              strokeWidth="2.5"
+              strokeWidth="2"
               className="transition-colors duration-500"
             >
-              <ellipse cx="100" cy="30" rx="17" ry="20" />
-              <path d={BODY_PATH_D} />
+              <path d={activeBodyPath} />
             </g>
           </svg>
 
@@ -410,9 +430,9 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
             const isHydrated = percentage >= organ.thresholdPercent;
             const isSelected = selectedOrgan?.id === organ.id;
 
-            // Compute exact relative % inside the 200x320 SVG coordinate frame
+            // Compute exact relative % inside the 200x360 SVG coordinate frame
             const leftPercent = (organ.cx / 200) * 100;
-            const topPercent = (organ.cy / 320) * 100;
+            const topPercent = (organ.cy / 360) * 100;
 
             return (
               <button

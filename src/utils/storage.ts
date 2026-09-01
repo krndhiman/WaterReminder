@@ -67,7 +67,7 @@ export const DEFAULT_PROFILE: UserProfile = {
   activityLevel: 'moderate',
   climate: 'temperate',
   theme: 'ocean',
-  progressDisplayMode: 'body',
+  progressDisplayMode: 'male',
   environmental: {
     acOffice: false,
     climate: 'temperate',
