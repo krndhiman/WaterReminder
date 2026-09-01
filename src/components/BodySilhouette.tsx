@@ -124,8 +124,7 @@ interface BodySilhouetteProps {
 }
 
 export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) => {
-  const { selectedRecord, chugWarning, clearChugWarning, profile, weather, updateProfile } =
-    useWater();
+  const { selectedRecord, chugWarning, clearChugWarning, profile, weather } = useWater();
 
   const grossTotal = selectedRecord.total;
   const netTotal = selectedRecord.netTotal || grossTotal;
@@ -247,51 +246,12 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
           }}
         />
 
-        {/* Top 3-Mode Segmented Control: [ 👨 Male ] [ 👩 Female ] [ 🍶 Cylinder ] */}
-        <div className="w-full z-20 flex items-center justify-between gap-1.5 pt-1 px-1">
-          <div className="flex items-center gap-1 bg-black/50 p-1 rounded-2xl border border-white/[0.08] backdrop-blur-md">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                updateProfile({ progressDisplayMode: 'male' });
-              }}
-              className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 ${
-                !isFemale
-                  ? 'bg-[#0a84ff] text-white shadow-sm'
-                  : 'text-neutral-400 hover:text-white'
-              }`}
-            >
-              <span>👨 Male</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                updateProfile({ progressDisplayMode: 'female' });
-              }}
-              className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 ${
-                isFemale
-                  ? 'bg-[#0a84ff] text-white shadow-sm'
-                  : 'text-neutral-400 hover:text-white'
-              }`}
-            >
-              <span>👩 Female</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                updateProfile({ progressDisplayMode: 'bottle' });
-              }}
-              className="px-2.5 py-1 rounded-xl text-[11px] font-semibold text-neutral-400 hover:text-white transition cursor-pointer flex items-center gap-1"
-              title="Switch to Cylinder Bottle view"
-            >
-              <span>🍶 Cylinder</span>
-            </button>
-          </div>
+        {/* Top Header Bar: Clean Title & Organ Status Badge */}
+        <div className="w-full z-20 flex items-center justify-between gap-1.5 pt-1 px-2">
+          <span className="text-[11px] font-semibold text-neutral-400 flex items-center gap-1.5 bg-black/40 px-3 py-1 rounded-full border border-white/[0.08] backdrop-blur-md">
+            <span>{isFemale ? '👩' : '👨'}</span>
+            <span>{isFemale ? 'Female Physique' : 'Male Physique'}</span>
+          </span>
 
           {/* Biological Organ Status Badge */}
           <button
@@ -308,12 +268,12 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
             title="Tap to view biological organ hydration status"
           >
             <Activity className="w-3 h-3" />
-            <span>{hydratedOrgansCount}/6</span>
+            <span>{hydratedOrgansCount}/6 Organs</span>
           </button>
         </div>
 
         {/* Volume Scale Markers (pinned to right edge) */}
-        <div className="absolute right-3.5 top-18 bottom-28 flex flex-col justify-between items-end text-[10px] font-mono text-neutral-500 z-20 pointer-events-none select-none">
+        <div className="absolute right-3.5 top-16 bottom-28 flex flex-col justify-between items-end text-[10px] font-mono text-neutral-500 z-20 pointer-events-none select-none">
           <div className="flex items-center gap-1">
             <span className={percentage >= 100 ? 'text-[#30d158] font-bold' : ''}>
               {selectedRecord.goal}ml
@@ -345,9 +305,9 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
         </div>
 
         {/* ========================================================
-            THE PRECISION MEDICAL VECTOR HUMAN BODY CANVAS
+            THE PRECISION MEDICAL VECTOR HUMAN BODY CANVAS (Taller & Grand)
         ======================================================== */}
-        <div className="relative w-[190px] h-[270px] flex items-center justify-center my-auto">
+        <div className="relative w-[210px] h-[300px] flex items-center justify-center my-auto">
           <svg
             viewBox="0 0 200 300"
             className="w-full h-full overflow-visible drop-shadow-xl select-none"
