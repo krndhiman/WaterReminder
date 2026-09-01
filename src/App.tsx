@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useWater, WaterProvider } from './context/WaterContext';
 import { LiquidBottle } from './components/LiquidBottle';
+import { BodySilhouette } from './components/BodySilhouette';
 import { QuickAddBar } from './components/QuickAddBar';
 import { ReminderBanner } from './components/ReminderBanner';
 import { NotificationBanner } from './components/NotificationBanner';
@@ -202,8 +203,12 @@ const MainLayout: React.FC = () => {
               </div>
             </div>
 
-            {/* Central Apple Minimalist Fluid Hero */}
-            <LiquidBottle onQuickAdd={() => setIsCustomModalOpen(true)} />
+            {/* Central Apple Minimalist Fluid Hero: Body Silhouette or Cylinder */}
+            {profile.progressDisplayMode === 'bottle' ? (
+              <LiquidBottle onQuickAdd={() => setIsCustomModalOpen(true)} />
+            ) : (
+              <BodySilhouette onQuickAdd={() => setIsCustomModalOpen(true)} />
+            )}
 
             {/* 1-Tap Quick Sips Bar */}
             <QuickAddBar

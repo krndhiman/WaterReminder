@@ -62,12 +62,17 @@ export interface ReminderSchedule {
   smartSilenceEnabled: boolean; // Auto-silence reminder if user drank within last 30m
 }
 
+export type AvatarSilhouetteType = 'male' | 'female' | 'neutral' | 'cute';
+export type ProgressDisplayMode = 'body' | 'bottle';
+
 export interface UserProfile {
   dailyGoal: number; // base goal default 4000
   weightKg?: number;
   activityLevel?: 'sedentary' | 'moderate' | 'active' | 'athlete';
   climate?: 'temperate' | 'tropical' | 'hot_dry';
   theme: 'ocean' | 'aquamarine' | 'cyberpunk' | 'deep_sea';
+  avatarType?: AvatarSilhouetteType;
+  progressDisplayMode?: ProgressDisplayMode;
   environmental: EnvironmentalFactors;
   clinical: ClinicalProfile;
 }

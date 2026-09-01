@@ -14,6 +14,7 @@ import {
   Users,
   Cloud,
   Info,
+  User,
 } from 'lucide-react';
 import { useWater } from '../context/WaterContext';
 import { COACH_PERSONAS, CoachPersonaType } from '../types/beverages';
@@ -48,6 +49,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     exportJSON,
     exportCSV,
     clearAllHistory,
+    profile,
+    updateProfile,
   } = useWater();
 
   const user = getOrCreateUserIdentity();
@@ -256,7 +259,55 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <ChevronRight className="w-4 h-4 text-neutral-500 group-hover:text-white transition" />
         </motion.button>
 
-        {/* 7. Sound Toggle */}
+        {/* 7. Body Silhouette & Avatar Style */}
+        <div className="p-4 rounded-3xl apple-card space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3.5">
+              <div className="p-2.5 rounded-2xl bg-[#bf5af2]/15 text-[#bf5af2]">
+                <User className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-white">
+                  Body Silhouette & Visual Mode
+                </h3>
+                <p className="text-xs text-neutral-400">
+                  Custom avatar & interactive biological organ tracking
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Silhouette Type Buttons */}
+          <div className="grid grid-cols-4 gap-1.5 pt-1">
+            {(
+              [
+                { id: 'neutral', label: 'Athletic', icon: '🧍' },
+                { id: 'male', label: 'Male', icon: '👨' },
+                { id: 'female', label: 'Female', icon: '👩' },
+                { id: 'cute', label: 'Cute', icon: '🧸' },
+              ] as const
+            ).map((item) => {
+              const isSelected = (profile.avatarType || 'neutral') === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => updateProfile({ avatarType: item.id, progressDisplayMode: 'body' })}
+                  className={`p-2 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center gap-1 ${
+                    isSelected && (profile.progressDisplayMode || 'body') === 'body'
+                      ? 'bg-[#0a84ff]/20 border-[#0a84ff] text-white shadow-md'
+                      : 'bg-black/40 border-white/[0.06] text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <span className="text-xl">{item.icon}</span>
+                  <span className="text-[10px] font-semibold truncate">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 8. Sound Toggle */}
         <div className="p-4 rounded-3xl apple-card flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             <div className="p-2.5 rounded-2xl bg-neutral-800 text-neutral-300">
