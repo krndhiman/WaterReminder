@@ -195,29 +195,18 @@ export const LiquidBottle: React.FC<{ onQuickAdd?: () => void }> = ({ onQuickAdd
           <canvas ref={canvasRef} width={280} height={340} className="w-full h-full block" />
         </div>
 
-        {/* Top 3-Mode Segmented Control: [ 👨 Male ] [ 👩 Female ] [ 🍶 Cylinder ] */}
+        {/* Top 2-Mode Segmented Control: [ 🧍 Human Body ] [ 🍶 Cylinder ] */}
         <div className="w-full z-20 flex items-center justify-between gap-1.5 pt-1 px-1">
           <div className="flex items-center gap-1 bg-black/50 p-1 rounded-2xl border border-white/[0.08] backdrop-blur-md">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                updateProfile({ progressDisplayMode: 'male', avatarType: 'male' });
+                updateProfile({ progressDisplayMode: 'body' });
               }}
-              className="px-2.5 py-1 rounded-xl text-[11px] font-semibold text-neutral-400 hover:text-white transition cursor-pointer flex items-center gap-1"
+              className="px-3 py-1 rounded-xl text-[11px] font-semibold text-neutral-400 hover:text-white transition cursor-pointer flex items-center gap-1.5"
             >
-              <span>👨 Male</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                updateProfile({ progressDisplayMode: 'female', avatarType: 'female' });
-              }}
-              className="px-2.5 py-1 rounded-xl text-[11px] font-semibold text-neutral-400 hover:text-white transition cursor-pointer flex items-center gap-1"
-            >
-              <span>👩 Female</span>
+              <span>🧍 Human Body</span>
             </button>
 
             <button
@@ -226,7 +215,7 @@ export const LiquidBottle: React.FC<{ onQuickAdd?: () => void }> = ({ onQuickAdd
                 e.stopPropagation();
                 updateProfile({ progressDisplayMode: 'bottle' });
               }}
-              className="px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-[#0a84ff] text-white shadow-sm transition cursor-pointer flex items-center gap-1"
+              className="px-3 py-1 rounded-xl text-[11px] font-semibold bg-[#0a84ff] text-white shadow-sm transition cursor-pointer flex items-center gap-1.5"
             >
               <span>🍶 Cylinder</span>
             </button>

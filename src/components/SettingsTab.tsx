@@ -277,45 +277,34 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             </div>
           </div>
 
-          {/* 3 Visual Mode Buttons */}
-          <div className="grid grid-cols-3 gap-2 pt-1">
+          {/* 2 Visual Mode Buttons */}
+          <div className="grid grid-cols-2 gap-3 pt-1">
             <button
               type="button"
-              onClick={() => updateProfile({ progressDisplayMode: 'male', avatarType: 'male' })}
-              className={`p-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center gap-1.5 ${
-                profile.progressDisplayMode === 'male' || (!profile.progressDisplayMode && profile.avatarType !== 'female')
+              onClick={() => updateProfile({ progressDisplayMode: 'body' })}
+              className={`p-3.5 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center gap-1.5 ${
+                profile.progressDisplayMode !== 'bottle'
                   ? 'bg-[#0a84ff]/20 border-[#0a84ff] text-white shadow-md'
                   : 'bg-black/40 border-white/[0.06] text-neutral-400 hover:text-white'
               }`}
             >
-              <span className="text-2xl">👨</span>
-              <span className="text-xs font-semibold">Male Body</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => updateProfile({ progressDisplayMode: 'female', avatarType: 'female' })}
-              className={`p-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center gap-1.5 ${
-                profile.progressDisplayMode === 'female'
-                  ? 'bg-[#0a84ff]/20 border-[#0a84ff] text-white shadow-md'
-                  : 'bg-black/40 border-white/[0.06] text-neutral-400 hover:text-white'
-              }`}
-            >
-              <span className="text-2xl">👩</span>
-              <span className="text-xs font-semibold">Female Body</span>
+              <span className="text-3xl">🧍</span>
+              <span className="text-xs font-semibold">Human Body</span>
+              <span className="text-[10px] text-neutral-400">WaterMinder silhouette</span>
             </button>
 
             <button
               type="button"
               onClick={() => updateProfile({ progressDisplayMode: 'bottle' })}
-              className={`p-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center gap-1.5 ${
+              className={`p-3.5 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center gap-1.5 ${
                 profile.progressDisplayMode === 'bottle'
                   ? 'bg-[#0a84ff]/20 border-[#0a84ff] text-white shadow-md'
                   : 'bg-black/40 border-white/[0.06] text-neutral-400 hover:text-white'
               }`}
             >
-              <span className="text-2xl">🍶</span>
-              <span className="text-xs font-semibold">Cylinder</span>
+              <span className="text-3xl">🍶</span>
+              <span className="text-xs font-semibold">Cylinder Bottle</span>
+              <span className="text-[10px] text-neutral-400">Minimal fluid cylinder</span>
             </button>
           </div>
         </div>

@@ -7,9 +7,9 @@ import {
   X,
   ShieldCheck,
   Flame,
+  User,
 } from 'lucide-react';
 import { useWater } from '../context/WaterContext';
-import { ProgressDisplayMode } from '../types/water';
 
 // 6 Major Biological Organ Milestones
 export interface OrganMilestone {
@@ -17,8 +17,8 @@ export interface OrganMilestone {
   name: string;
   shortName: string;
   emoji: string;
-  x: number; // percentage in coordinate space (0-100)
-  y: number; // percentage in coordinate space (0-100)
+  cx: number; // in 0 0 200 320 coordinate space
+  cy: number; // in 0 0 200 320 coordinate space
   thresholdPercent: number; // % hydration required to activate
   title: string;
   scienceNote: string;
@@ -32,8 +32,8 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     name: 'Brain & Nervous System',
     shortName: 'Brain',
     emoji: '🧠',
-    x: 50,
-    y: 10,
+    cx: 100,
+    cy: 30,
     thresholdPercent: 90,
     title: 'Cognitive Optimization & Alertness',
     scienceNote:
@@ -46,8 +46,8 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     name: 'Lungs & Respiratory Tract',
     shortName: 'Lungs',
     emoji: '🫁',
-    x: 50,
-    y: 25,
+    cx: 100,
+    cy: 82,
     thresholdPercent: 75,
     title: 'Moist Mucous Membranes & Oxygen Exchange',
     scienceNote:
@@ -60,8 +60,8 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     name: 'Heart & Blood Plasma',
     shortName: 'Heart',
     emoji: '🫀',
-    x: 47,
-    y: 34,
+    cx: 93,
+    cy: 108,
     thresholdPercent: 60,
     title: 'Blood Plasma Volume & Stroke Power',
     scienceNote:
@@ -74,8 +74,8 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     name: 'Kidneys & Renal Filtration',
     shortName: 'Kidneys',
     emoji: '🫧',
-    x: 50,
-    y: 47,
+    cx: 100,
+    cy: 146,
     thresholdPercent: 45,
     title: 'Waste Detoxification & Mineral Balance',
     scienceNote:
@@ -88,8 +88,8 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     name: 'Metabolism & Digestive Tract',
     shortName: 'Metabolism',
     emoji: '⚡',
-    x: 50,
-    y: 57,
+    cx: 100,
+    cy: 172,
     thresholdPercent: 30,
     title: 'Enzyme Activation & Nutrient Transport',
     scienceNote:
@@ -102,8 +102,8 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
     name: 'Joints, Fascia & Muscular Tissue',
     shortName: 'Muscles & Joints',
     emoji: '🦵',
-    x: 50,
-    y: 77,
+    cx: 100,
+    cy: 235,
     thresholdPercent: 15,
     title: 'Synovial Lubrication & Cramp Defense',
     scienceNote:
@@ -113,14 +113,9 @@ export const ORGAN_MILESTONES: OrganMilestone[] = [
   },
 ];
 
-interface Bubble {
-  x: number;
-  y: number;
-  size: number;
-  speed: number;
-  alpha: number;
-  sway: number;
-}
+// Unified Human Body Vector Contour
+const BODY_PATH_D =
+  'M 93,48 C 90,49 76,60 62,72 C 57,76 54,84 56,102 C 58,122 62,148 66,170 C 68,178 74,180 78,174 C 80,170 80,156 78,138 C 76,120 80,102 85,96 C 88,90 90,96 90,108 C 88,130 86,152 86,172 C 86,194 84,220 82,246 C 80,272 80,294 82,304 C 83,309 88,310 91,308 C 94,306 94,296 94,278 C 94,252 95,226 96,200 C 97,188 98,178 100,172 C 102,178 103,188 104,200 C 105,226 106,252 106,278 C 106,296 106,306 109,308 C 112,310 117,309 118,304 C 120,294 120,272 118,246 C 116,220 114,194 114,172 C 114,152 112,130 110,108 C 110,96 112,90 115,96 C 120,102 124,120 122,138 C 120,156 120,170 122,174 C 126,180 132,178 134,170 C 138,148 142,122 144,102 C 146,84 143,76 138,72 C 124,60 110,49 107,48 Z';
 
 interface BodySilhouetteProps {
   onQuickAdd?: () => void;
@@ -129,27 +124,21 @@ interface BodySilhouetteProps {
 export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) => {
   const { selectedRecord, chugWarning, clearChugWarning, profile, weather, updateProfile } =
     useWater();
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const grossTotal = selectedRecord.total;
   const netTotal = selectedRecord.netTotal || grossTotal;
   const percentage = Math.min(100, Math.max(0, Math.round((netTotal / selectedRecord.goal) * 100)));
   const remainingMl = Math.max(0, selectedRecord.goal - netTotal);
 
-  // Active visual mode: 'male' | 'female' (cylinder is handled in App.tsx)
-  const currentMode: 'male' | 'female' =
-    profile.progressDisplayMode === 'female' ? 'female' : 'male';
-
   const [selectedOrgan, setSelectedOrgan] = useState<OrganMilestone | null>(null);
 
-  // Wave physics
-  const waveAmplitudeRef = useRef<number>(3.5);
-  const phaseRef = useRef<number>(0);
-  const bubblesRef = useRef<Bubble[]>([]);
+  // SVG Wave Animation State (pure SVG rendering, 100% aligned on all devices)
+  const [phase, setPhase] = useState(0);
+  const [amplitude, setAmplitude] = useState(3.5);
   const animationFrameRef = useRef<number | null>(null);
 
   const handleBodyTap = () => {
-    waveAmplitudeRef.current = 12;
+    setAmplitude(10);
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {
         navigator.vibrate(18);
@@ -159,128 +148,58 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
     }
   };
 
-  // Fluid canvas wave animation loop
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    if (bubblesRef.current.length === 0) {
-      for (let i = 0; i < 20; i++) {
-        bubblesRef.current.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          size: Math.random() * 2.2 + 1,
-          speed: Math.random() * 0.9 + 0.35,
-          alpha: Math.random() * 0.45 + 0.15,
-          sway: Math.random() * Math.PI * 2,
-        });
-      }
-    }
-
     let isRunning = true;
 
-    const render = () => {
+    const tick = () => {
       if (!isRunning) return;
-
-      const width = canvas.width;
-      const height = canvas.height;
-
-      ctx.clearRect(0, 0, width, height);
-
-      phaseRef.current += 0.035;
-      waveAmplitudeRef.current += (3.5 - waveAmplitudeRef.current) * 0.04;
-
-      const currentWaterHeight = (percentage / 100) * height;
-      const baseWaterY = height - currentWaterHeight;
-
-      if (percentage > 0) {
-        // 1. Back Wave (Deep Subdued Ocean Blue)
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(0, height);
-        for (let x = 0; x <= width; x += 4) {
-          const wave1 =
-            Math.sin(x * 0.02 + phaseRef.current + Math.PI) * (waveAmplitudeRef.current * 0.65);
-          const y = baseWaterY + wave1;
-          ctx.lineTo(x, y);
-        }
-        ctx.lineTo(width, height);
-        ctx.closePath();
-
-        const backGrad = ctx.createLinearGradient(0, baseWaterY, 0, height);
-        backGrad.addColorStop(0, '#005bb5');
-        backGrad.addColorStop(1, '#003366');
-        ctx.fillStyle = backGrad;
-        ctx.fill();
-        ctx.restore();
-
-        // 2. Front Wave (Vibrant Apple Blue)
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(0, height);
-        for (let x = 0; x <= width; x += 4) {
-          const wave2 = Math.sin(x * 0.024 + phaseRef.current) * waveAmplitudeRef.current;
-          const y = baseWaterY + wave2;
-          ctx.lineTo(x, y);
-        }
-        ctx.lineTo(width, height);
-        ctx.closePath();
-
-        const frontGrad = ctx.createLinearGradient(0, baseWaterY, 0, height);
-        frontGrad.addColorStop(0, '#2997ff');
-        frontGrad.addColorStop(0.3, '#0a84ff');
-        frontGrad.addColorStop(0.7, '#0071e3');
-        frontGrad.addColorStop(1, '#004a99');
-        ctx.fillStyle = frontGrad;
-        ctx.fill();
-
-        // 3. Meniscus Highlight Line
-        ctx.beginPath();
-        for (let x = 0; x <= width; x += 4) {
-          const wave2 = Math.sin(x * 0.024 + phaseRef.current) * waveAmplitudeRef.current;
-          const y = baseWaterY + wave2;
-          if (x === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.restore();
-
-        // 4. Floating Micro Bubbles
-        ctx.save();
-        bubblesRef.current.forEach((b) => {
-          b.y -= b.speed;
-          b.sway += 0.035;
-          const currentX = b.x + Math.sin(b.sway) * 2.5;
-
-          if (b.y < baseWaterY) {
-            b.y = height + Math.random() * 20;
-            b.x = Math.random() * width;
-          }
-
-          if (b.y >= baseWaterY && b.y <= height) {
-            ctx.beginPath();
-            ctx.arc(currentX, b.y, b.size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${b.alpha})`;
-            ctx.fill();
-          }
-        });
-        ctx.restore();
-      }
-
-      animationFrameRef.current = requestAnimationFrame(render);
+      setPhase((prev) => prev + 0.04);
+      setAmplitude((prev) => prev + (3.5 - prev) * 0.05);
+      animationFrameRef.current = requestAnimationFrame(tick);
     };
 
-    render();
+    animationFrameRef.current = requestAnimationFrame(tick);
 
     return () => {
       isRunning = false;
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     };
-  }, [percentage]);
+  }, []);
+
+  // Compute precise SVG Wave Paths inside the 0 0 200 320 coordinate box
+  const { frontWavePath, backWavePath, meniscusPath } = useMemo(() => {
+    if (percentage <= 0) {
+      return { frontWavePath: '', backWavePath: '', meniscusPath: '' };
+    }
+
+    const totalHeight = 320;
+    const waterHeight = (percentage / 100) * totalHeight;
+    const baseWaterY = totalHeight - waterHeight;
+
+    // Front Wave
+    let front = `M 0 320 L 0 ${baseWaterY} `;
+    let meniscus = `M 0 ${baseWaterY} `;
+    for (let x = 0; x <= 200; x += 5) {
+      const waveY = baseWaterY + Math.sin(x * 0.035 + phase) * amplitude;
+      front += `L ${x} ${waveY} `;
+      meniscus += `L ${x} ${waveY} `;
+    }
+    front += `L 200 320 Z`;
+
+    // Back Wave
+    let back = `M 0 320 L 0 ${baseWaterY} `;
+    for (let x = 0; x <= 200; x += 5) {
+      const waveY = baseWaterY + Math.sin(x * 0.03 + phase + Math.PI) * (amplitude * 0.7);
+      back += `L ${x} ${waveY} `;
+    }
+    back += `L 200 320 Z`;
+
+    return {
+      frontWavePath: front,
+      backWavePath: back,
+      meniscusPath: meniscus,
+    };
+  }, [percentage, phase, amplitude]);
 
   const hydratedOrgansCount = useMemo(() => {
     return ORGAN_MILESTONES.filter((o) => percentage >= o.thresholdPercent).length;
@@ -322,37 +241,18 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
           }}
         />
 
-        {/* Top 3-Mode Segmented Control: [ 👨 Male ] [ 👩 Female ] [ 🍶 Cylinder ] */}
+        {/* Top Control Bar: [ 🧍 Human Body ] [ 🍶 Cylinder ] & Organ Badge */}
         <div className="w-full z-20 flex items-center justify-between gap-1.5 pt-1 px-1">
           <div className="flex items-center gap-1 bg-black/50 p-1 rounded-2xl border border-white/[0.08] backdrop-blur-md">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                updateProfile({ progressDisplayMode: 'male', avatarType: 'male' });
+                updateProfile({ progressDisplayMode: 'body' });
               }}
-              className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 ${
-                currentMode === 'male'
-                  ? 'bg-[#0a84ff] text-white shadow-sm'
-                  : 'text-neutral-400 hover:text-white'
-              }`}
+              className="px-3 py-1 rounded-xl text-[11px] font-semibold bg-[#0a84ff] text-white shadow-sm transition cursor-pointer flex items-center gap-1.5"
             >
-              <span>👨 Male</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                updateProfile({ progressDisplayMode: 'female', avatarType: 'female' });
-              }}
-              className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 ${
-                currentMode === 'female'
-                  ? 'bg-[#0a84ff] text-white shadow-sm'
-                  : 'text-neutral-400 hover:text-white'
-              }`}
-            >
-              <span>👩 Female</span>
+              <span>🧍 Human Body</span>
             </button>
 
             <button
@@ -361,8 +261,8 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
                 e.stopPropagation();
                 updateProfile({ progressDisplayMode: 'bottle' });
               }}
-              className="px-2.5 py-1 rounded-xl text-[11px] font-semibold text-neutral-400 hover:text-white transition cursor-pointer flex items-center gap-1"
-              title="Switch to Cylinder Bottle view"
+              className="px-3 py-1 rounded-xl text-[11px] font-semibold text-neutral-400 hover:text-white transition cursor-pointer flex items-center gap-1.5"
+              title="Switch to Cylinder Bottle View"
             >
               <span>🍶 Cylinder</span>
             </button>
@@ -375,12 +275,12 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
               e.stopPropagation();
               setSelectedOrgan(ORGAN_MILESTONES[0]);
             }}
-            className={`px-2.5 py-1 rounded-full border text-[10px] font-semibold flex items-center gap-1 transition cursor-pointer backdrop-blur-md shrink-0 ${
+            className={`px-2.5 py-1 rounded-full border text-[10px] font-semibold flex items-center gap-1.5 transition cursor-pointer backdrop-blur-md shrink-0 ${
               hydratedOrgansCount === ORGAN_MILESTONES.length
                 ? 'bg-[#30d158]/15 border-[#30d158]/30 text-[#30d158]'
                 : 'bg-[#0a84ff]/10 border-[#0a84ff]/25 text-[#0a84ff]'
             }`}
-            title="Tap to see biological organ hydration breakdown"
+            title="Tap to view biological organ hydration status"
           >
             <Activity className="w-3 h-3" />
             <span>{hydratedOrgansCount}/6</span>
@@ -420,122 +320,99 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
         </div>
 
         {/* ========================================================
-            THE CLEAN ANATOMICAL HUMAN BODY SILHOUETTE CANVAS
+            THE PURE SVG WATERMINDER-STYLE HUMAN BODY VISUALIZER
         ======================================================== */}
-        <div className="relative w-[210px] h-[320px] flex items-center justify-center my-auto">
-          {/* SVG Definition with Clean Clip Path */}
+        <div className="relative w-[210px] h-[310px] flex items-center justify-center my-auto">
           <svg
-            className="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible"
-            viewBox="0 0 220 380"
+            viewBox="0 0 200 320"
+            className="w-full h-full overflow-visible drop-shadow-xl select-none"
           >
             <defs>
-              {/* Dynamic Silhouette Clip Path */}
-              <clipPath id="body-silhouette-clip">
-                {currentMode === 'male' ? (
-                  <>
-                    {/* Male Head */}
-                    <ellipse cx="110" cy="36" rx="19" ry="23" />
-                    {/* Male Torso, Arms & Legs */}
-                    <path d="M 98,58 C 94,59 78,74 62,88 C 58,92 56,102 58,124 C 60,148 64,178 68,204 C 70,212 76,214 80,208 C 82,204 82,188 80,166 C 78,144 82,122 88,114 C 92,108 94,116 94,130 C 92,156 90,182 90,206 C 90,232 88,262 86,292 C 84,322 84,350 86,364 C 87,370 92,372 96,370 C 100,368 100,356 100,336 C 100,306 102,276 104,246 C 105,231 106,218 110,212 C 114,218 115,231 116,246 C 118,276 120,306 120,336 C 120,356 120,368 124,370 C 128,372 133,370 134,364 C 136,350 136,322 134,292 C 132,262 130,232 130,206 C 130,182 128,156 126,130 C 126,116 128,108 132,114 C 138,122 142,144 140,166 C 138,188 138,204 140,208 C 144,214 150,212 152,204 C 156,178 160,148 162,124 C 164,102 162,92 158,88 C 142,74 126,59 122,58 Z" />
-                  </>
-                ) : (
-                  <>
-                    {/* Female Head */}
-                    <ellipse cx="110" cy="38" rx="17" ry="21" />
-                    {/* Female Torso, Arms & Legs (Contoured hourglass curves) */}
-                    <path d="M 100,58 C 96,59 84,72 70,86 C 66,90 64,100 66,122 C 68,146 72,176 76,200 C 78,208 84,210 88,204 C 90,200 90,186 88,166 C 86,146 90,126 96,116 C 98,110 98,118 98,130 C 96,155 92,180 92,205 C 92,230 90,260 88,290 C 86,320 86,348 88,362 C 89,368 94,370 98,368 C 102,366 102,355 102,335 C 102,305 103,275 104,245 C 105,230 106,218 110,212 C 114,218 115,230 116,245 C 117,275 118,305 118,335 C 118,355 118,366 122,368 C 126,370 131,368 132,362 C 134,348 134,320 132,290 C 130,260 126,230 126,205 C 126,180 122,155 120,130 C 120,118 120,110 122,116 C 128,126 132,146 130,166 C 128,186 128,200 130,204 C 134,210 140,208 142,200 C 146,176 150,146 152,122 C 154,100 152,90 148,86 C 134,72 122,59 118,58 Z" />
-                  </>
-                )}
-              </clipPath>
-
-              {/* Glowing anatomical inner shadow */}
-              <linearGradient id="body-empty-glow" x1="0" y1="0" x2="0" y2="1">
+              {/* Linear Gradient for Empty Silhouette */}
+              <linearGradient id="body-glass-bg" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#2c2c2e" stopOpacity="0.45" />
                 <stop offset="100%" stopColor="#161618" stopOpacity="0.85" />
               </linearGradient>
+
+              {/* Linear Gradient for Front Fluid Wave */}
+              <linearGradient id="body-water-front" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#2997ff" />
+                <stop offset="25%" stopColor="#0a84ff" />
+                <stop offset="70%" stopColor="#0071e3" />
+                <stop offset="100%" stopColor="#004a99" />
+              </linearGradient>
+
+              {/* Linear Gradient for Back Fluid Wave */}
+              <linearGradient id="body-water-back" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#005bb5" />
+                <stop offset="100%" stopColor="#002d5a" />
+              </linearGradient>
+
+              {/* The Single Vector Anatomical ClipPath */}
+              <clipPath id="waterminder-body-clip">
+                {/* Head */}
+                <ellipse cx="100" cy="30" rx="17" ry="20" />
+                {/* Torso, Arms & Legs */}
+                <path d={BODY_PATH_D} />
+              </clipPath>
             </defs>
 
-            {/* Empty Body Silhouette Backdrop */}
-            {currentMode === 'male' ? (
-              <g
-                fill="url(#body-empty-glow)"
-                stroke="rgba(255, 255, 255, 0.16)"
-                strokeWidth="2"
-                className="transition-colors duration-500"
-              >
-                <ellipse cx="110" cy="36" rx="19" ry="23" />
-                <path d="M 98,58 C 94,59 78,74 62,88 C 58,92 56,102 58,124 C 60,148 64,178 68,204 C 70,212 76,214 80,208 C 82,204 82,188 80,166 C 78,144 82,122 88,114 C 92,108 94,116 94,130 C 92,156 90,182 90,206 C 90,232 88,262 86,292 C 84,322 84,350 86,364 C 87,370 92,372 96,370 C 100,368 100,356 100,336 C 100,306 102,276 104,246 C 105,231 106,218 110,212 C 114,218 115,231 116,246 C 118,276 120,306 120,336 C 120,356 120,368 124,370 C 128,372 133,370 134,364 C 136,350 136,322 134,292 C 132,262 130,232 130,206 C 130,182 128,156 126,130 C 126,116 128,108 132,114 C 138,122 142,144 140,166 C 138,188 138,204 140,208 C 144,214 150,212 152,204 C 156,178 160,148 162,124 C 164,102 162,92 158,88 C 142,74 126,59 122,58 Z" />
-              </g>
-            ) : (
-              <g
-                fill="url(#body-empty-glow)"
-                stroke="rgba(255, 255, 255, 0.16)"
-                strokeWidth="2"
-                className="transition-colors duration-500"
-              >
-                <ellipse cx="110" cy="38" rx="17" ry="21" />
-                <path d="M 100,58 C 96,59 84,72 70,86 C 66,90 64,100 66,122 C 68,146 72,176 76,200 C 78,208 84,210 88,204 C 90,200 90,186 88,166 C 86,146 90,126 96,116 C 98,110 98,118 98,130 C 96,155 92,180 92,205 C 92,230 90,260 88,290 C 86,320 86,348 88,362 C 89,368 94,370 98,368 C 102,366 102,355 102,335 C 102,305 103,275 104,245 C 105,230 106,218 110,212 C 114,218 115,230 116,245 C 117,275 118,305 118,335 C 118,355 118,366 122,368 C 126,370 131,368 132,362 C 134,348 134,320 132,290 C 130,260 126,230 126,205 C 126,180 122,155 120,130 C 120,118 120,110 122,116 C 128,126 132,146 130,166 C 128,186 128,200 130,204 C 134,210 140,208 142,200 C 146,176 150,146 152,122 C 154,100 152,90 148,86 C 134,72 122,59 118,58 Z" />
+            {/* 1. Empty Dark Glass Body Background */}
+            <g
+              fill="url(#body-glass-bg)"
+              stroke="rgba(255, 255, 255, 0.16)"
+              strokeWidth="2"
+              className="transition-colors duration-500"
+            >
+              <ellipse cx="100" cy="30" rx="17" ry="20" />
+              <path d={BODY_PATH_D} />
+            </g>
+
+            {/* 2. Fluid Wave Layer (Clipped 100% inside the Human Body) */}
+            {percentage > 0 && (
+              <g clipPath="url(#waterminder-body-clip)">
+                {/* Back Wave */}
+                <path d={backWavePath} fill="url(#body-water-back)" />
+                {/* Front Wave */}
+                <path d={frontWavePath} fill="url(#body-water-front)" />
+                {/* Surface Meniscus Line */}
+                <path
+                  d={meniscusPath}
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.75)"
+                  strokeWidth="2.5"
+                />
               </g>
             )}
-          </svg>
 
-          {/* HTML Canvas Fluid Layer clipped inside the Body Silhouette */}
-          <div
-            className="absolute inset-0 w-full h-full overflow-hidden"
-            style={{
-              clipPath: 'url(#body-silhouette-clip)',
-              WebkitClipPath: 'url(#body-silhouette-clip)',
-            }}
-          >
-            <canvas ref={canvasRef} width={220} height={380} className="w-full h-full block" />
-          </div>
-
-          {/* Outer Silhouette Stroke Glow Layer */}
-          <svg
-            className="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible"
-            viewBox="0 0 220 380"
-          >
-            {currentMode === 'male' ? (
-              <g
-                fill="none"
-                stroke={
-                  percentage >= 100
-                    ? 'rgba(48, 209, 88, 0.7)'
-                    : percentage > 0
-                    ? 'rgba(10, 132, 255, 0.45)'
-                    : 'rgba(255, 255, 255, 0.16)'
-                }
-                strokeWidth="2"
-                className="transition-colors duration-500"
-              >
-                <ellipse cx="110" cy="36" rx="19" ry="23" />
-                <path d="M 98,58 C 94,59 78,74 62,88 C 58,92 56,102 58,124 C 60,148 64,178 68,204 C 70,212 76,214 80,208 C 82,204 82,188 80,166 C 78,144 82,122 88,114 C 92,108 94,116 94,130 C 92,156 90,182 90,206 C 90,232 88,262 86,292 C 84,322 84,350 86,364 C 87,370 92,372 96,370 C 100,368 100,356 100,336 C 100,306 102,276 104,246 C 105,231 106,218 110,212 C 114,218 115,231 116,246 C 118,276 120,306 120,336 C 120,356 120,368 124,370 C 128,372 133,370 134,364 C 136,350 136,322 134,292 C 132,262 130,232 130,206 C 130,182 128,156 126,130 C 126,116 128,108 132,114 C 138,122 142,144 140,166 C 138,188 138,204 140,208 C 144,214 150,212 152,204 C 156,178 160,148 162,124 C 164,102 162,92 158,88 C 142,74 126,59 122,58 Z" />
-              </g>
-            ) : (
-              <g
-                fill="none"
-                stroke={
-                  percentage >= 100
-                    ? 'rgba(48, 209, 88, 0.7)'
-                    : percentage > 0
-                    ? 'rgba(10, 132, 255, 0.45)'
-                    : 'rgba(255, 255, 255, 0.16)'
-                }
-                strokeWidth="2"
-                className="transition-colors duration-500"
-              >
-                <ellipse cx="110" cy="38" rx="17" ry="21" />
-                <path d="M 100,58 C 96,59 84,72 70,86 C 66,90 64,100 66,122 C 68,146 72,176 76,200 C 78,208 84,210 88,204 C 90,200 90,186 88,166 C 86,146 90,126 96,116 C 98,110 98,118 98,130 C 96,155 92,180 92,205 C 92,230 90,260 88,290 C 86,320 86,348 88,362 C 89,368 94,370 98,368 C 102,366 102,355 102,335 C 102,305 103,275 104,245 C 105,230 106,218 110,212 C 114,218 115,230 116,245 C 117,275 118,305 118,335 C 118,355 118,366 122,368 C 126,370 131,368 132,362 C 134,348 134,320 132,290 C 130,260 126,230 126,205 C 126,180 122,155 120,130 C 120,118 120,110 122,116 C 128,126 132,146 130,166 C 128,186 128,200 130,204 C 134,210 140,208 142,200 C 146,176 150,146 152,122 C 154,100 152,90 148,86 C 134,72 122,59 118,58 Z" />
-              </g>
-            )}
+            {/* 3. Outer Silhouette Stroke & Glow */}
+            <g
+              fill="none"
+              stroke={
+                percentage >= 100
+                  ? 'rgba(48, 209, 88, 0.75)'
+                  : percentage > 0
+                  ? 'rgba(10, 132, 255, 0.5)'
+                  : 'rgba(255, 255, 255, 0.18)'
+              }
+              strokeWidth="2.5"
+              className="transition-colors duration-500"
+            >
+              <ellipse cx="100" cy="30" rx="17" ry="20" />
+              <path d={BODY_PATH_D} />
+            </g>
           </svg>
 
           {/* ========================================================
-              INTERACTIVE ORGAN MILESTONE NODES
+              INTERACTIVE ORGAN MILESTONE NODES (Positioned relative to SVG box)
           ======================================================== */}
           {ORGAN_MILESTONES.map((organ) => {
             const isHydrated = percentage >= organ.thresholdPercent;
             const isSelected = selectedOrgan?.id === organ.id;
+
+            // Compute exact relative % inside the 200x320 SVG coordinate frame
+            const leftPercent = (organ.cx / 200) * 100;
+            const topPercent = (organ.cy / 320) * 100;
 
             return (
               <button
@@ -546,8 +423,8 @@ export const BodySilhouette: React.FC<BodySilhouetteProps> = ({ onQuickAdd }) =>
                   setSelectedOrgan(organ);
                 }}
                 style={{
-                  top: `${organ.y}%`,
-                  left: `${organ.x}%`,
+                  top: `${topPercent}%`,
+                  left: `${leftPercent}%`,
                   transform: 'translate(-50%, -50%)',
                 }}
                 className={`absolute z-30 flex items-center justify-center transition cursor-pointer group ${
